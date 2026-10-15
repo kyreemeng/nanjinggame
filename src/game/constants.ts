@@ -1,10 +1,13 @@
 export const GAME_TITLE = 'Ashline'
 export const DISTRICT_NAME = 'Harbor Row'
 
-export const WORLD_SIZE = 220
-export const ROAD_WIDTH = 9
-export const BLOCK_SIZE = 38
-export const GRID_BLOCKS = 4
+export const BLOCK_SIZE = 40
+export const ROAD_WIDTH = 11
+export const BOULEVARD_WIDTH = 16
+export const GRID_COLS = 7
+export const GRID_ROWS = 6
+export const WORLD_SIZE = 400
+export const WORLD_HALF = WORLD_SIZE / 2
 
 export const PLAYER_HEIGHT = 1.75
 export const PLAYER_RADIUS = 0.35
@@ -14,7 +17,7 @@ export const JUMP_VELOCITY = 5.8
 export const GRAVITY = -18
 
 export const VEHICLE_ENTER_DISTANCE = 3.2
-export const VEHICLE_MAX_SPEED = 28
+export const VEHICLE_MAX_SPEED = 32
 export const VEHICLE_ACCEL = 22
 export const VEHICLE_BRAKE = 35
 export const VEHICLE_REVERSE_MAX = 10
@@ -24,3 +27,6 @@ export const CAMERA_DISTANCE_FOOT = 4.2
 export const CAMERA_HEIGHT_FOOT = 1.65
 export const CAMERA_DISTANCE_VEHICLE = 9
 export const CAMERA_HEIGHT_VEHICLE = 2.4
+
+/** Main north–south boulevard column index */
+export const BOULEVARD_COL = 3

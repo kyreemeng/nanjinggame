@@ -1,6 +1,6 @@
 # Ashline
 
-**Ashline** is an original browser open-world action prototype set in **Harbor Row** — a coastal city district. Phase 1 is a playable vertical slice: walk, jump, drive one car, and explore a procedural block with physics collisions.
+**Ashline** is an original browser open-world action prototype set in **Harbor Row** — a coastal city district. Walk, drive, and explore a growing procedural city with physics collisions.
 
 ## Architecture (brief)
 
@@ -8,13 +8,15 @@
 | --- | --- |
 | `src/components/` | React HUD, main menu, pause menu |
 | `src/game/GameEngine.ts` | Three.js render loop + Rapier step |
-| `src/game/world/` | Procedural city meshes & colliders |
+| `src/game/world/` | District map, roads, buildings, instanced props, atmosphere |
 | `src/game/entities/` | Player character controller & vehicle |
 | `src/game/physics/` | Rapier world wrapper |
+| `src/game/ai/` | Phase 3 traffic / pedestrian stubs |
+| `src/game/systems/` | Phase 3 wanted-level hook |
 | `src/game/store/` | Zustand HUD / flow state |
 | `src/storage/` | `localStorage` settings |
 
-React owns 2D UI; the canvas engine owns 3D and physics. Future systems (traffic, missions, wanted level) can hang off `src/game/missions/types.ts` and the game store.
+React owns 2D UI; the canvas engine owns 3D and physics.
 
 ## Quick start
 
@@ -23,11 +25,11 @@ npm install
 npm run dev
 ```
 
-Open the URL Vite prints (default **http://127.0.0.1:4317**).
+Open **http://127.0.0.1:4317**.
 
 ```bash
-npm run build    # production bundle
-npm run preview  # serve dist
+npm run build
+npm run preview
 ```
 
 ## Controls
@@ -44,21 +46,26 @@ npm run preview  # serve dist
 | **Esc** | Pause |
 | **Click** | Capture mouse when hint is shown |
 
-## Phase 1 (this build)
+## Phase 1 (complete)
 
-- Procedural **Harbor Row** grid: roads, sidewalks, crosswalks, street lights, trees, varied building silhouettes (downtown core, residential, industrial edges).
-- Third-person on-foot movement with Rapier character controller, gravity, and building collisions.
-- One drivable vehicle with speed-sensitive steering, follow camera, enter/exit spawn offset.
-- HUD: minimap, compass, FPS, health/credits/objective stubs, speed when driving.
-- Main menu → **Start Game**, pause menu, input cleared on blur / pointer unlock.
+- Third-person movement, one drivable vehicle, HUD, menus, Rapier collisions.
+- Core loop: walk → enter car → drive → exit.
 
-## Deferred (later phases)
+## Phase 2 (this build)
 
-- NPC / traffic density
-- Police / wanted system
-- Full mission chain & map UI
-- Multiple vehicles, day/night cycle polish, graphics presets
-- IndexedDB save slots (settings already use `localStorage`)
+- **Larger Harbor Row**: 7×6 block grid (~400 m), north–south boulevard + east–west artery, side streets.
+- **Zones**: downtown towers, residential rowhouses, industrial warehouses, waterfront piers & water, pocket parks.
+- **Street layer**: center dashes, crosswalks, traffic lights at intersections, sidewalks/curbs, benches, instanced street lights & trees (no per-pole point lights — better FPS).
+- **Visual depth**: gradient sky dome, tuned fog, distant skyline ring, sun shadows that follow the player.
+- **Performance**: shared materials, `InstancedMesh` props, emissive lamps instead of hundreds of lights.
+- **Hooks**: `DayNightCycle` (off by default), traffic/pedestrian/wanted stubs wired in the engine tick.
+
+## Next (Phase 3+)
+
+- Moving traffic & pedestrians using road/sidewalk graphs
+- Police / wanted gameplay tied to `WantedSystem`
+- Mission chain, map UI, day/night polish, quality presets
+- IndexedDB save slots
 
 ## Stack
 

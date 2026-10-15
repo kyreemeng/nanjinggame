@@ -32,7 +32,7 @@ export function GameView() {
     if (!engine) return
     if (phase === 'playing') {
       engine.resume()
-    } else if (phase === 'paused') {
+    } else {
       engine.pause()
     }
   }, [phase])

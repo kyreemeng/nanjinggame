@@ -6,9 +6,14 @@ import { FollowCamera } from './camera/FollowCamera'
 import { InputManager } from './input/InputManager'
 import { PhysicsWorld } from './physics/PhysicsWorld'
 import { buildCity } from './world/CityBuilder'
+import { createAtmosphere, updateSunShadowFocus, type AtmosphereHandles } from './world/atmosphere'
+import { DayNightCycle } from './world/dayNight'
 import { useGameStore } from './store/gameStore'
 import { loadSettings } from '../storage/settings'
 import { VEHICLE_ENTER_DISTANCE } from './constants'
+import { createPedestrianSystemStub } from './ai/pedestrianTypes'
+import { createTrafficSystemStub } from './ai/trafficTypes'
+import { WantedSystem } from './systems/WantedSystem'
 
 export type ControlMode = 'foot' | 'vehicle'
 
@@ -28,6 +33,11 @@ export class GameEngine {
   private fpsFrames = 0
   private fpsLast = performance.now()
   private settings = loadSettings()
+  private atmosphere!: AtmosphereHandles
+  private dayNight = new DayNightCycle()
+  private traffic = createTrafficSystemStub()
+  private pedestrians = createPedestrianSystemStub()
+  private wanted = new WantedSystem()
 
   private canvas: HTMLCanvasElement
 
@@ -47,20 +57,8 @@ export class GameEngine {
     this.renderer.setSize(this.canvas.clientWidth, this.canvas.clientHeight, false)
 
     this.scene = new THREE.Scene()
-    this.scene.background = new THREE.Color('#8eb4d9')
-    this.scene.fog = new THREE.Fog('#9eb9d4', 45, 165)
-
-    const hemi = new THREE.HemisphereLight('#dfe9ff', '#4a5a48', 0.55)
-    this.scene.add(hemi)
-    const sun = new THREE.DirectionalLight('#fff2d6', 1.35)
-    sun.position.set(60, 90, 35)
-    sun.castShadow = true
-    sun.shadow.mapSize.set(2048, 2048)
-    sun.shadow.camera.left = -90
-    sun.shadow.camera.right = 90
-    sun.shadow.camera.top = 90
-    sun.shadow.camera.bottom = -90
-    this.scene.add(sun)
+    this.atmosphere = createAtmosphere(this.scene)
+    this.scene.add(this.atmosphere.sun.target)
 
     this.physics = new PhysicsWorld()
     await this.physics.init()
@@ -140,6 +138,12 @@ export class GameEngine {
         driving: this.mode === 'vehicle',
         canEnterVehicle: this.mode === 'foot' && distToCar < VEHICLE_ENTER_DISTANCE,
       })
+
+      updateSunShadowFocus(this.atmosphere.sun, playerPos)
+      this.dayNight.update(dt, this.atmosphere, this.scene)
+      this.traffic.tick(dt)
+      this.pedestrians.tick(dt)
+      this.wanted.decay(dt)
     }
 
     this.updateFps()

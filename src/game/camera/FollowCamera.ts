@@ -9,7 +9,7 @@ import {
 export class FollowCamera {
   private yaw = 0
   private pitch = 0.28
-  readonly camera = new THREE.PerspectiveCamera(60, 1, 0.1, 400)
+  readonly camera = new THREE.PerspectiveCamera(60, 1, 0.1, 480)
 
   resize(width: number, height: number): void {
     this.camera.aspect = width / height
