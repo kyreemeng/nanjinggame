@@ -97,7 +97,7 @@ export class PhysicsWorld {
     const col = this.world.createCollider(collider, body)
     const controller = this.world.createCharacterController(0.02)
     controller.setApplyImpulsesToDynamicBodies(true)
-    controller.enableSnapToGround(0.35)
+    controller.enableSnapToGround(0.55)
     controller.setMaxSlopeClimbAngle((45 * Math.PI) / 180)
     return { body, collider: col, controller }
   }

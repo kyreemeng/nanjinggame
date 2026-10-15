@@ -8,7 +8,11 @@ import type { ColliderBox } from '../../physics/PhysicsWorld'
 import { getAsphaltMaterial, getConcreteMaterial } from '../sharedMaterials'
 import { addLandmarkLodMeshes } from './landmarkLod'
 import { buildRoadGraphFromOsM, sampleSidewalkAlongRoads } from './osmRoadGraph'
-import { buildTerrainHeightfield, type TerrainHeightfieldData } from './terrainHeightfield'
+import {
+  buildTerrainBoxColliders,
+  buildTerrainHeightfield,
+  type TerrainHeightfieldData,
+} from './terrainHeightfield'
 import { setActiveRoadGraph, setSidewalkLoops } from '../roadGraph'
 
 export interface NanjingWorldResult {
@@ -21,6 +25,7 @@ export interface NanjingWorldResult {
   roadSnapDistance: number
   mapAnchors: { x: number; z: number; label: string }[]
   terrainHeightfield: TerrainHeightfieldData
+  terrainBoxColliders: ColliderBox[]
 }
 
 function heightAt(bundle: NanjingMapBundle, x: number, z: number): number {
@@ -161,6 +166,7 @@ function addAnchorMarkers(parent: THREE.Group, bundle: NanjingMapBundle): void {
 export function buildNanjingWorld(bundle: NanjingMapBundle): NanjingWorldResult {
   const bounds = worldBoundsFromBbox(ACTIVE_WORLD_BBOX)
   const terrainHeightfield = buildTerrainHeightfield(bundle, bounds)
+  const terrainBoxColliders = buildTerrainBoxColliders(bundle, bounds)
   const group = new THREE.Group()
   const colliders: ColliderBox[] = []
 
@@ -203,5 +209,6 @@ export function buildNanjingWorld(bundle: NanjingMapBundle): NanjingWorldResult 
     roadSnapDistance: spawn.roadSnapDistance,
     mapAnchors,
     terrainHeightfield,
+    terrainBoxColliders,
   }
 }

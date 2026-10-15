@@ -27,6 +27,7 @@ import {
   PLAYER_BODY_CLEARANCE,
   VEHICLE_BODY_CLEARANCE,
 } from '../map-data/groundHeight'
+import { minPlayerBodyY, minVehicleBodyY } from '../map-data/terrainGrounding'
 import { getCachedNanjingMap } from '../map-data/loadNanjingMap'
 import type { DemGridMeta } from '../map-data/types'
 
@@ -101,6 +102,9 @@ export class GameEngine {
     }
     this.scene.add(city.group)
     for (const box of city.colliders) {
+      this.physics.addStaticBox(box)
+    }
+    for (const box of city.terrainBoxColliders ?? []) {
       this.physics.addStaticBox(box)
     }
 
@@ -297,7 +301,11 @@ export class GameEngine {
         if (this.mode === 'foot') {
           this.followCam.addMouseLook(dx, dy, this.settings.mouseSensitivity, this.settings.invertY)
           const camYaw = this.followCam.getYaw()
-          this.player.update(dt, this.input, camYaw)
+          const minPy =
+            this.terrainDem !== null
+              ? minPlayerBodyY(this.terrainDem, this.player.position.x, this.player.position.z)
+              : undefined
+          this.player.update(dt, this.input, camYaw, minPy)
         } else {
           this.followCam.addMouseLook(
             dx,
@@ -307,8 +315,17 @@ export class GameEngine {
           )
           this.vehicle.update(dt, this.input)
         }
-        this.vehicle.syncMesh()
         this.physics.step(dt)
+        if (this.terrainDem) {
+          const pp = this.player.position
+          this.player.enforceMinBodyY(minPlayerBodyY(this.terrainDem, pp.x, pp.z))
+          const vp = this.vehicle.position
+          this.vehicle.enforceMinBodyY(minVehicleBodyY(this.terrainDem, vp.x, vp.z))
+        }
+        this.vehicle.syncMesh()
+        if (this.mode === 'foot') {
+          this.player.syncMeshFromBody()
+        }
       }
 
       const target =

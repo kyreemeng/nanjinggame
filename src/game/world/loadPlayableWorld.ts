@@ -17,6 +17,7 @@ export interface PlayableWorldLoadResult {
   mapAnchors: { x: number; z: number; label: string }[]
   mode: WorldMode
   terrainHeightfield?: TerrainHeightfieldData
+  terrainBoxColliders?: ColliderBox[]
 }
 
 export async function loadPlayableWorld(mode: WorldMode): Promise<PlayableWorldLoadResult> {
@@ -51,5 +52,6 @@ export async function loadPlayableWorld(mode: WorldMode): Promise<PlayableWorldL
     mapAnchors: city.mapAnchors,
     mode: 'nanjing',
     terrainHeightfield: city.terrainHeightfield,
+    terrainBoxColliders: city.terrainBoxColliders,
   }
 }

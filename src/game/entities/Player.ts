@@ -52,7 +52,17 @@ export class Player {
 
   setPosition(pos: THREE.Vector3): void {
     this.body.setTranslation({ x: pos.x, y: pos.y, z: pos.z }, true)
-    this.mesh.position.copy(pos)
+    this.syncMeshFromBody()
+  }
+
+  resetVerticalVelocity(): void {
+    this.verticalVelocity = 0
+    this.grounded = true
+  }
+
+  syncMeshFromBody(): void {
+    const t = this.body.translation()
+    this.mesh.position.set(t.x, t.y - 0.35, t.z)
   }
 
   setVisible(v: boolean): void {
@@ -60,7 +70,12 @@ export class Player {
     this.mesh.visible = v
   }
 
-  update(dt: number, input: InputManager, cameraYaw: number): void {
+  update(
+    dt: number,
+    input: InputManager,
+    cameraYaw: number,
+    minBodyY?: number,
+  ): void {
     const forward = new THREE.Vector3(-Math.sin(cameraYaw), 0, -Math.cos(cameraYaw))
     const right = new THREE.Vector3().crossVectors(forward, new THREE.Vector3(0, 1, 0)).normalize()
 
@@ -113,13 +128,20 @@ export class Player {
       { x: desiredMovement.x, y: desiredMovement.y, z: desiredMovement.z },
     )
     const corrected = this.controller.computedMovement()
+    let nextY = translation.y + corrected.y
+    if (minBodyY !== undefined && nextY < minBodyY) {
+      nextY = minBodyY
+      this.verticalVelocity = 0
+      this.grounded = true
+    }
+
     const next = {
       x: translation.x + corrected.x,
-      y: translation.y + corrected.y,
+      y: nextY,
       z: translation.z + corrected.z,
     }
     this.body.setNextKinematicTranslation(next)
-    this.grounded = this.controller.computedGrounded()
+    this.grounded = this.controller.computedGrounded() || (minBodyY !== undefined && nextY <= minBodyY + 0.05)
 
     if (this.grounded && this.verticalVelocity < 0) {
       this.verticalVelocity = 0
@@ -131,5 +153,14 @@ export class Player {
 
     this.mesh.position.set(next.x, next.y - 0.35, next.z)
     this.mesh.rotation.y = this.yaw
+  }
+
+  /** After physics step — hard clamp if controller slipped through terrain. */
+  enforceMinBodyY(minY: number): void {
+    const t = this.body.translation()
+    if (t.y >= minY) return
+    this.body.setTranslation({ x: t.x, y: minY, z: t.z }, true)
+    this.resetVerticalVelocity()
+    this.syncMeshFromBody()
   }
 }

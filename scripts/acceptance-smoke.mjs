@@ -95,6 +95,14 @@ if (spawnCheck.status !== 0) {
   throw new Error(`spawn Y check failed:\n${spawnCheck.stderr}\n${spawnCheck.stdout}`)
 }
 
+const fallSim = spawnSync(process.execPath, ['scripts/terrain-fall-sim.mjs'], {
+  cwd: process.cwd(),
+  encoding: 'utf8',
+})
+if (fallSim.status !== 0) {
+  throw new Error(`terrain fall sim failed:\n${fallSim.stderr}\n${fallSim.stdout}`)
+}
+
 console.log(
   `acceptance-smoke: ok (missions + i18n + drivable graph ${(ratio * 100).toFixed(1)}% connected, spawn on terrain)`,
 )

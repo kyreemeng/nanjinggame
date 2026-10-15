@@ -156,6 +156,15 @@ export class Vehicle {
     return pos.clone().add(right.multiplyScalar(2.4)).setY(1.05)
   }
 
+  enforceMinBodyY(minY: number): void {
+    const t = this.body.translation()
+    if (t.y >= minY) return
+    this.body.setTranslation({ x: t.x, y: minY, z: t.z }, true)
+    const vel = this.body.linvel()
+    this.body.setLinvel({ x: vel.x, y: 0, z: vel.z }, true)
+    this.syncMesh()
+  }
+
   setWorldPose(x: number, y: number, z: number, yaw: number): void {
     this.speed = 0
     const halfYaw = yaw / 2
