@@ -54,8 +54,34 @@ export class PedestrianSystem {
 
   private readonly scene: THREE.Scene
 
+  private tutorialPed: Pedestrian | null = null
+
   constructor(scene: THREE.Scene) {
     this.scene = scene
+  }
+
+  /** Guaranteed NPC for tutorial contract near spawn. */
+  ensureTutorialGuide(position: THREE.Vector3): void {
+    if (this.tutorialPed) return
+    const mesh = createPedMesh('#4a7ab8', '#2a2f38')
+    mesh.position.copy(position)
+    this.scene.add(mesh)
+    const loop = [
+      position.clone(),
+      position.clone().add(new THREE.Vector3(3, 0, 0)),
+      position.clone().add(new THREE.Vector3(3, 0, 3)),
+      position.clone().add(new THREE.Vector3(0, 0, 3)),
+    ]
+    this.tutorialPed = {
+      mesh,
+      points: loop,
+      segment: 0,
+      u: 0,
+      speed: 0.9,
+      idleLeft: 0,
+      greetLine: 'Welcome to Harbor Row — press E to chat.',
+    }
+    this.peds.push(this.tutorialPed)
   }
 
   tick(dt: number, playerPos: THREE.Vector3): void {

@@ -149,6 +149,19 @@ export class Vehicle {
     const pos = this.position
     const yaw = this.yaw
     const right = new THREE.Vector3(Math.cos(yaw), 0, -Math.sin(yaw))
+    for (const dist of [2.4, 3.2, -2.4]) {
+      const candidate = pos.clone().add(right.clone().multiplyScalar(dist)).setY(1.05)
+      if (Math.abs(candidate.x) < 175 && Math.abs(candidate.z) < 175) return candidate
+    }
     return pos.clone().add(right.multiplyScalar(2.4)).setY(1.05)
+  }
+
+  setWorldPose(x: number, y: number, z: number, yaw: number): void {
+    this.speed = 0
+    const halfYaw = yaw / 2
+    this.body.setTranslation({ x, y, z }, true)
+    this.body.setRotation({ x: 0, y: Math.sin(halfYaw), z: 0, w: Math.cos(halfYaw) }, true)
+    this.body.setLinvel({ x: 0, y: 0, z: 0 }, true)
+    this.syncMesh()
   }
 }

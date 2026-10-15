@@ -1,6 +1,6 @@
 import { create } from 'zustand'
 import type { MissionSaveSlice } from '../missions/MissionManager'
-import { defaultMissionSave } from '../../storage/saveGame'
+import { defaultMissionSave, defaultWorldPose, type WorldPose } from '../../storage/saveGame'
 
 export type GamePhase = 'menu' | 'playing' | 'paused'
 
@@ -31,6 +31,7 @@ export interface GameStoreState {
   npcPrompt: string | null
   mapOpen: boolean
   bootError: string | null
+  worldPose: WorldPose
   setPhase: (phase: GamePhase) => void
   setMapOpen: (open: boolean) => void
   setBootError: (message: string | null) => void
@@ -58,7 +59,13 @@ export interface GameStoreState {
   ) => void
   setMissionSave: (slice: MissionSaveSlice) => void
   setNewGameSession: (v: boolean) => void
-  hydrateFromSave: (data: { money: number; health: number; missionSave: MissionSaveSlice }) => void
+  setWorldPose: (world: WorldPose) => void
+  hydrateFromSave: (data: {
+    money: number
+    health: number
+    missionSave: MissionSaveSlice
+    worldPose: WorldPose
+  }) => void
   resetRun: () => void
 }
 
@@ -83,7 +90,9 @@ export const useGameStore = create<GameStoreState>((set) => ({
   npcPrompt: null,
   mapOpen: false,
   bootError: null,
+  worldPose: defaultWorldPose(),
   setPhase: (phase) => set({ phase }),
+  setWorldPose: (world) => set({ worldPose: world }),
   setMapOpen: (open) => set({ mapOpen: open }),
   setBootError: (message) => set({ bootError: message }),
   setHud: (partial) => set(partial),
@@ -94,6 +103,7 @@ export const useGameStore = create<GameStoreState>((set) => ({
       money: data.money,
       health: data.health,
       missionSave: data.missionSave,
+      worldPose: data.worldPose,
       newGameSession: false,
     }),
   resetRun: () =>
@@ -112,6 +122,7 @@ export const useGameStore = create<GameStoreState>((set) => ({
       npcPrompt: null,
       mapOpen: false,
       bootError: null,
+      worldPose: defaultWorldPose(),
       objective: 'Contract: First Steps',
     }),
 }))

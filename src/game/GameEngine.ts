@@ -10,6 +10,7 @@ import { createAtmosphere, updateSunShadowFocus, type AtmosphereHandles } from '
 import { DayNightCycle } from './world/dayNight'
 import { useGameStore } from './store/gameStore'
 import { loadSettings, type GraphicsPreset } from '../storage/settings'
+import { defaultWorldPose, loadSave, type WorldPose } from '../storage/saveGame'
 import { VEHICLE_ENTER_DISTANCE } from './constants'
 import { TrafficSystem } from './ai/TrafficSystem'
 import { PedestrianSystem } from './ai/PedestrianSystem'
@@ -49,6 +50,9 @@ export class GameEngine {
   private movedThisFrame = 0
   private lookThisFrame = 0
   private talkedThisFrame = false
+  private missionSaveTimer = 0
+  private worldPoseTimer = 0
+  private settingsRevision = 0
 
   private canvas: HTMLCanvasElement
 
@@ -107,6 +111,10 @@ export class GameEngine {
     this.scene.add(this.followCam.camera)
 
     this.lastPlayerPos.copy(this.player.position)
+    this.applyWorldFromStore(store.newGameSession)
+    this.pedestrians.ensureTutorialGuide(
+      this.player.position.clone().add(new THREE.Vector3(2.5, 0, 1.5)),
+    )
 
     this.detachInput = this.input.attach(this.canvas)
     this.running = true
@@ -119,6 +127,7 @@ export class GameEngine {
     this.input.releaseAll()
     const slice = this.missions.getSaveSlice()
     useGameStore.getState().setMissionSave(slice)
+    useGameStore.getState().setWorldPose(this.captureWorldPose())
   }
 
   resume(): void {
@@ -160,6 +169,45 @@ export class GameEngine {
     this.input.setBindings(this.settings.bindings)
   }
 
+  notifySettingsChanged(): void {
+    this.settingsRevision++
+    this.syncSettings()
+  }
+
+  private applyWorldFromStore(isNewGame: boolean): void {
+    const pose: WorldPose =
+      isNewGame ? defaultWorldPose() : useGameStore.getState().worldPose ?? defaultWorldPose()
+    const disk = !isNewGame ? loadSave() : null
+    const world = disk?.world ?? pose
+
+    this.player.setPosition(new THREE.Vector3(world.player.x, world.player.y, world.player.z))
+    this.vehicle.setWorldPose(world.vehicle.x, world.vehicle.y, world.vehicle.z, world.vehicle.yaw)
+    this.mode = world.mode
+    if (world.mode === 'vehicle') {
+      this.player.setVisible(false)
+      this.player.collider.setEnabled(false)
+      useGameStore.getState().setHud({ driving: true })
+    } else {
+      this.player.setVisible(true)
+      this.player.collider.setEnabled(true)
+      useGameStore.getState().setHud({ driving: false })
+    }
+  }
+
+  private captureWorldPose(): WorldPose {
+    const pp = this.player.position
+    return {
+      player: { x: pp.x, y: pp.y, z: pp.z },
+      vehicle: {
+        x: this.vehicle.position.x,
+        y: this.vehicle.position.y,
+        z: this.vehicle.position.z,
+        yaw: this.vehicle.yaw,
+      },
+      mode: this.mode,
+    }
+  }
+
   private loop = (): void => {
     if (!this.running) return
     this.raf = requestAnimationFrame(this.loop)
@@ -167,7 +215,6 @@ export class GameEngine {
 
     const store = useGameStore.getState()
     if (store.phase === 'playing') {
-      this.syncSettings()
       const mapOpen = store.mapOpen
       if (mapOpen) {
         this.input.setEnabled(false)
@@ -207,8 +254,10 @@ export class GameEngine {
       this.followCam.update(target, this.mode === 'vehicle', dt, this.vehicle.yaw)
 
       const playerPos = this.mode === 'foot' ? this.player.position : this.vehicle.position
-      this.movedThisFrame = playerPos.distanceTo(this.lastPlayerPos)
-      this.lastPlayerPos.copy(playerPos)
+      if (!mapOpen) {
+        this.movedThisFrame = playerPos.distanceTo(this.lastPlayerPos)
+        this.lastPlayerPos.copy(playerPos)
+      }
 
       const distToCar = playerPos.distanceTo(this.vehicle.position)
       const speedKmh = this.mode === 'vehicle' ? this.vehicle.speedKmh : 0
@@ -250,7 +299,17 @@ export class GameEngine {
         speedKmh,
       })
 
-      useGameStore.getState().setMissionSave(this.missions.getSaveSlice())
+      this.missionSaveTimer += dt
+      if (this.missionSaveTimer >= 0.5) {
+        this.missionSaveTimer = 0
+        useGameStore.getState().setMissionSave(this.missions.getSaveSlice())
+      }
+
+      this.worldPoseTimer += dt
+      if (this.worldPoseTimer >= 2) {
+        this.worldPoseTimer = 0
+        useGameStore.getState().setWorldPose(this.captureWorldPose())
+      }
 
       this.audio.updateEngine(this.mode === 'vehicle', speedKmh)
 
