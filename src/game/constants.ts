@@ -7,8 +7,8 @@ export const ROAD_WIDTH = 11
 export const BOULEVARD_WIDTH = 16
 export const GRID_COLS = 7
 export const GRID_ROWS = 6
-/** Sky / fallback extent — matches verified-core bbox diagonal (~4.7 km). */
-export const WORLD_SIZE = 4800
+/** Sky / fallback extent — urban core + Zijin corridor diagonal (~6.5 km). */
+export const WORLD_SIZE = 6600
 export const WORLD_HALF = WORLD_SIZE / 2
 
 export const PLAYER_HEIGHT = 1.75

@@ -18,8 +18,8 @@ export interface PlayableBbox {
 }
 
 /**
- * Phase-1 verified core: continuous drivable slice (新街口—中山路—玄武湖南缘—夫子庙北缘).
- * Smaller than full “old town” vision; distances are not compressed.
+ * Phase-2 urban verified core (新街口—中山路—玄武湖—夫子庙/秦淮河).
+ * Retained for docs / regression; subset of active world.
  */
 export const NANJING_VERIFIED_CORE_BBOX: PlayableBbox = {
   minLat: 32.018,
@@ -28,16 +28,32 @@ export const NANJING_VERIFIED_CORE_BBOX: PlayableBbox = {
   maxLon: 118.818,
 }
 
-/** Future expansion bbox (not loaded in v1). */
+/**
+ * Phase-3 Purple Mountain scenic corridor (east of core, OSM-verified extent).
+ * Overlaps core on the west; no invented terrain outside fetched OSM/DEM.
+ */
+export const ZIJIN_VERIFIED_BBOX: PlayableBbox = {
+  minLat: 32.038,
+  maxLat: 32.078,
+  minLon: 118.808,
+  maxLon: 118.858,
+}
+
+/** Union of urban core + Zijin corridor — active fetch & render bounds. */
+export const ACTIVE_WORLD_BBOX: PlayableBbox = {
+  minLat: Math.min(NANJING_VERIFIED_CORE_BBOX.minLat, ZIJIN_VERIFIED_BBOX.minLat),
+  maxLat: Math.max(NANJING_VERIFIED_CORE_BBOX.maxLat, ZIJIN_VERIFIED_BBOX.maxLat),
+  minLon: Math.min(NANJING_VERIFIED_CORE_BBOX.minLon, ZIJIN_VERIFIED_BBOX.minLon),
+  maxLon: Math.max(NANJING_VERIFIED_CORE_BBOX.maxLon, ZIJIN_VERIFIED_BBOX.maxLon),
+}
+
+/** Long-term vision outline (not necessarily fully loaded). */
 export const NANJING_PLAYABLE_BBOX: PlayableBbox = {
   minLat: 32.008,
   maxLat: 32.088,
   minLon: 118.748,
-  maxLon: 118.852,
+  maxLon: 118.862,
 }
-
-/** Active world uses verified core only. */
-export const ACTIVE_WORLD_BBOX = NANJING_VERIFIED_CORE_BBOX
 
 export const CRS_ORIGIN: GeoPoint = {
   lat: 32.048,
@@ -72,7 +88,7 @@ export function worldToGeo(x: number, z: number): { lat: number; lon: number } {
   return { lat, lon }
 }
 
-export function worldBoundsFromBbox(bbox: PlayableBbox = NANJING_PLAYABLE_BBOX): WorldBounds {
+export function worldBoundsFromBbox(bbox: PlayableBbox = ACTIVE_WORLD_BBOX): WorldBounds {
   const sw = geoToWorld(bbox.minLat, bbox.minLon, 0)
   const ne = geoToWorld(bbox.maxLat, bbox.maxLon, 0)
   const minX = Math.min(sw.x, ne.x)

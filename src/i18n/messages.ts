@@ -73,6 +73,9 @@ const en = {
   'landmark.laomendong': 'Laomendong',
   'landmark.ming-wall-zhongshan': 'Ming city wall (Zhongshan Gate)',
   'landmark.qinhuai-river': 'Qinhuai River (Fuzimiao)',
+  'landmark.zijinshan': 'Purple Mountain (Zijinshan)',
+  'landmark.zhongshan-ling': 'Sun Yat-sen Mausoleum',
+  'landmark.ming-xiaoling': 'Ming Xiaoling Mausoleum',
   'map.anchors': 'Landmarks',
 
   'hud.objective': 'Objective',
@@ -210,6 +213,9 @@ const zh: Record<keyof typeof en, string> = {
   'landmark.laomendong': '老门东',
   'landmark.ming-wall-zhongshan': '明城墙（中山门）',
   'landmark.qinhuai-river': '秦淮河（夫子庙段）',
+  'landmark.zijinshan': '紫金山',
+  'landmark.zhongshan-ling': '中山陵',
+  'landmark.ming-xiaoling': '明孝陵',
   'map.anchors': '地标锚点',
 
   'hud.objective': '目标',

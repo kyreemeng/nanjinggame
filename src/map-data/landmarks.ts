@@ -9,6 +9,8 @@ export interface LandmarkRecord {
   geo: GeoPoint
   /** OSM node/way reference when known */
   osmRef?: string
+  /** Simplified proxy mesh only — not photogrammetry */
+  lodProxy?: boolean
 }
 
 export const NANJING_LANDMARKS: LandmarkRecord[] = [
@@ -29,15 +31,14 @@ export const NANJING_LANDMARKS: LandmarkRecord[] = [
     id: 'xuanwu-lake',
     nameEn: 'Xuanwu Lake shore',
     nameZh: '玄武湖岸',
-    /** OSM water centroid (bundle w88806258), north shore verified core */
     geo: { lat: 32.04559, lon: 118.81369 },
   },
   {
     id: 'ming-wall-zhongshan',
     nameEn: 'Ming city wall (Zhongshan Gate)',
     nameZh: '明城墙（中山门）',
-    /** APPROXIMATE: gate position; shoreline geometry from OSM water adjacency */
     geo: { lat: 32.0458, lon: 118.8142 },
+    lodProxy: true,
   },
   {
     id: 'laomendong',
@@ -49,23 +50,36 @@ export const NANJING_LANDMARKS: LandmarkRecord[] = [
     id: 'qinhuai-river',
     nameEn: 'Qinhuai River (Fuzimiao)',
     nameZh: '秦淮河（夫子庙段）',
-    /** OSM riverbank centroid near Fuzimiao (bundle w120889873) */
     geo: { lat: 32.02028, lon: 118.79269 },
   },
-]
-
-/** Phase 3 — not in verified-core playable slice (excluded from default anchors). */
-export const PHASE3_LANDMARKS: LandmarkRecord[] = [
   {
-    id: 'zijinshan-lookout',
-    nameEn: 'Purple Mountain (distant)',
-    nameZh: '紫金山（远景）',
-    geo: { lat: 32.072, lon: 118.848 },
+    id: 'zijinshan',
+    nameEn: 'Purple Mountain (Zijinshan)',
+    nameZh: '紫金山',
+    geo: { lat: 32.0758, lon: 118.8488 },
+    osmRef: 'relation: scenic area (centroid approx.)',
+    lodProxy: true,
+  },
+  {
+    id: 'zhongshan-ling',
+    nameEn: 'Sun Yat-sen Mausoleum',
+    nameZh: '中山陵',
+    geo: { lat: 32.067475, lon: 118.848577 },
+    osmRef: 'node:27505821 area / tourism=attraction',
+    lodProxy: true,
+  },
+  {
+    id: 'ming-xiaoling',
+    nameEn: 'Ming Xiaoling Mausoleum',
+    nameZh: '明孝陵',
+    geo: { lat: 32.054724, lon: 118.843117 },
+    osmRef: 'historic=archaeological_site',
+    lodProxy: true,
   },
 ]
 
 export function landmarkWorldPosition(id: string): { x: number; y: number; z: number } | null {
-  const lm = NANJING_LANDMARKS.find((l) => l.id === id)
+  const lm = landmarkById(id)
   if (!lm) return null
   return geoToWorld(lm.geo.lat, lm.geo.lon, lm.geo.elevation ?? 0)
 }

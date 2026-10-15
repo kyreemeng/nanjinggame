@@ -1,6 +1,6 @@
 # 南京真实地理 · 开放世界网页游戏（Ashline）
 
-本仓库承载基于**南京真实地理**的浏览器 3D 开放世界原型（React + Vite + Three.js + Rapier）。默认可玩区域为 **OSM 验证核心区**（新街口—中山路—玄武湖南缘—夫子庙北缘），见 `src/map-data/coordinate-system.ts` 与 `docs/nanjing-map-sources.md`。
+本仓库承载基于**南京真实地理**的浏览器 3D 开放世界原型（React + Vite + Three.js + Rapier）。默认可玩区域为 **城区验证核心 + 紫金山廊道**（`ACTIVE_WORLD_BBOX`：向东至中山陵/明孝陵 OSM 范围），见 `src/map-data/coordinate-system.ts` 与 `docs/nanjing-map-sources.md`。
 
 ## 验收原则
 

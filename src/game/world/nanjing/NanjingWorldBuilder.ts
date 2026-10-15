@@ -6,6 +6,7 @@ import { coreAnchorMarkers } from '../../../map-data/landmarkAnchors'
 import { defaultSpawnFromBundle } from '../../../map-data/worldSpawn'
 import type { ColliderBox } from '../../physics/PhysicsWorld'
 import { getAsphaltMaterial, getConcreteMaterial } from '../sharedMaterials'
+import { addLandmarkLodMeshes } from './landmarkLod'
 import { buildRoadGraphFromOsM, sampleSidewalkAlongRoads } from './osmRoadGraph'
 import { setActiveRoadGraph, setSidewalkLoops } from '../roadGraph'
 
@@ -26,7 +27,7 @@ function heightAt(bundle: NanjingMapBundle, x: number, z: number): number {
 }
 
 function buildTerrainMesh(bundle: NanjingMapBundle, bounds: NanjingWorldResult['bounds']): THREE.Mesh {
-  const seg = 64
+  const seg = Math.min(128, Math.max(72, Math.round(Math.max(bounds.width, bounds.depth) / 55)))
   const geo = new THREE.PlaneGeometry(bounds.width + 80, bounds.depth + 80, seg, seg)
   geo.rotateX(-Math.PI / 2)
   const pos = geo.attributes.position
@@ -172,7 +173,8 @@ export function buildNanjingWorld(bundle: NanjingMapBundle): NanjingWorldResult 
 
   addWater(group, bundle)
   // APPROXIMATE: cap building count for Web perf; heights may be estimated per OSM tags.
-  addBuildings(group, colliders, bundle, 1200)
+  addBuildings(group, colliders, bundle, 1600)
+  addLandmarkLodMeshes(group, bundle)
   addAnchorMarkers(group, bundle)
 
   const spawn = defaultSpawnFromBundle(bundle)

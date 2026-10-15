@@ -7,7 +7,7 @@ import path from 'node:path'
 
 const OUT = path.join('public', 'map-data', 'nanjing-core')
 /** Must match ACTIVE_WORLD_BBOX in coordinate-system.ts */
-const BBOX = { minLat: 32.018, maxLat: 32.058, minLon: 118.768, maxLon: 118.818 }
+const BBOX = { minLat: 32.018, maxLat: 32.078, minLon: 118.768, maxLon: 118.858 }
 const ORIGIN = { lat: 32.048, lon: 118.8, elevation: 15 }
 const TILE = 0.025
 const USER_AGENT = 'AshlineNanjingMapBuild/1.0 (educational)'
@@ -68,8 +68,8 @@ async function fetchTile(minLon, minLat, maxLon, maxLat) {
 }
 
 async function fetchDemGrid() {
-  const rows = 9
-  const cols = 11
+  const rows = 13
+  const cols = 19
   const stepLat = (BBOX.maxLat - BBOX.minLat) / (rows - 1)
   const stepLon = (BBOX.maxLon - BBOX.minLon) / (cols - 1)
   const locations = []

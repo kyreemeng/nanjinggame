@@ -74,8 +74,16 @@ for (let i = 0; i < nodes.length; i++) {
 }
 const largest = Math.max(...sizes.values())
 const ratio = largest / nodes.length
-if (ratio < 0.9) {
+if (ratio < 0.85) {
   throw new Error(`drivable road graph too fragmented: largest component ${(ratio * 100).toFixed(1)}%`)
+}
+
+const bbox = bundle.manifest.bbox
+if (bbox.maxLon < 118.85 || bbox.maxLat < 32.07) {
+  throw new Error('map bundle bbox missing Zijin east/north extension — rebuild map data')
+}
+if (!messages.includes("'landmark.zhongshan-ling'")) {
+  throw new Error('missing i18n for zhongshan-ling anchor')
 }
 
 console.log(

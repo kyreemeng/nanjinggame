@@ -2,13 +2,16 @@ import { worldToGeo } from './coordinate-system'
 import { landmarkById, landmarkWorldPosition, type LandmarkRecord } from './landmarks'
 import type { NanjingMapBundle, WaterPolygon } from './types'
 
-/** Phase-2 HUD / map anchors (verified core only — no Purple Mountain expansion). */
+/** HUD / map anchors (urban core + Zijin scenic landmarks). */
 export const CORE_MAP_ANCHOR_IDS = [
   'xinjiekou',
   'xuanwu-lake',
   'ming-wall-zhongshan',
   'fuzimiao',
   'qinhuai-river',
+  'zijinshan',
+  'zhongshan-ling',
+  'ming-xiaoling',
 ] as const
 
 export type CoreMapAnchorId = (typeof CORE_MAP_ANCHOR_IDS)[number]

@@ -2,30 +2,34 @@
 
 ## Acceptance
 
-- **Authenticity over area**: default play uses the **verified core** bbox only (`NANJING_VERIFIED_CORE_BBOX` in `src/map-data/coordinate-system.ts`). The larger `NANJING_PLAYABLE_BBOX` is a future expansion outline — not loaded in phase 2.
-- **No evidence → approximate**: anything without OSM/DEM support must be labeled approximate in code or this doc.
+- **Authenticity over area**: loaded geometry is only what OSM/DEM fetch inside **ACTIVE_WORLD_BBOX**; no hand-painted filler terrain to “pad” the map.
+- **No evidence → approximate**: proxy LOD meshes, estimated building heights, and coarse colliders must be labeled here or in code.
 
-## Verified core bbox (WGS84)
+## Active world bbox (WGS84) — phase 3
+
+Union of urban core + Purple Mountain scenic corridor (`ACTIVE_WORLD_BBOX` in `coordinate-system.ts`):
 
 | Field | Value |
 | --- | --- |
-| minLat / maxLat | 32.018 / 32.058 |
-| minLon / maxLon | 118.768 / 118.818 |
-| Approx. size | ~4.7 km × ~4.5 km (ENU, uncompressed) |
-| Intent | Continuous drive/walk loop: **Xinjiekou ↔ Zhongshan Road ↔ Xuanwu Lake shore ↔ Ming wall (Zhongshan Gate) ↔ Fuzimiao / Qinhuai** |
+| minLat / maxLat | **32.018 / 32.078** |
+| minLon / maxLon | **118.768 / 118.858** |
+| Approx. size | ~6.7 km (E–W) × ~6.7 km (N–S) in ENU |
+| Urban subset | `NANJING_VERIFIED_CORE_BBOX` (32.018–32.058, 118.768–118.818) |
+| Zijin subset | `ZIJIN_VERIFIED_BBOX` (32.038–32.078, 118.808–118.858) |
 
-**Out of scope (phase 3):** Purple Mountain full scenic area (`PHASE3_LANDMARKS` in `landmarks.ts`) — not spawned as default anchors.
+**Intent:** Drive/walk from **新街口 / 玄武湖 / 中山门** into **紫金山** scenic roads toward **明孝陵** and **中山陵**, with spatial relations preserved (lake north of old city, mausoleums on the mountain slope east of the wall).
 
 ## Data sources
 
 | Layer | Source | Artifact / code |
 | --- | --- | --- |
 | Roads, buildings, water | OpenStreetMap ODbL via `api.openstreetmap.org/0.6/map` | `public/map-data/nanjing-core/core.bundle.json` |
-| Build script | `scripts/build-nanjing-map-data.mjs` | Regenerates bundle + `manifest.json` |
-| Elevation | open-elevation.com grid (SRTM/ASTER aggregate) | `manifest.json` → `dem` |
+| Build script | `scripts/build-nanjing-map-data.mjs` | Tiles + DEM grid scaled to bbox |
+| Elevation | open-elevation.com (13×19 grid over bbox) | `manifest.json` → `dem` |
 | CRS | Local ENU tangent plane | `CRS_ORIGIN` in `coordinate-system.ts` |
-| Named landmarks | OSM nodes / riverbank centroids | `src/map-data/landmarks.ts`, runtime snap in `landmarkAnchors.ts` |
-| Player spawn | Nearest **drivable** OSM highway near Xinjiekou | `src/map-data/roadSpawn.ts` (洪武路 secondary in current bundle) |
+| Named landmarks | OSM / gazetteer WGS84 | `src/map-data/landmarks.ts` |
+| Scenic LOD | **APPROXIMATE** proxies | `src/game/world/nanjing/landmarkLod.ts` |
+| Player spawn | Nearest drivable OSM road near Xinjiekou | `src/map-data/roadSpawn.ts` |
 
 Rebuild (network required):
 
@@ -33,35 +37,54 @@ Rebuild (network required):
 node scripts/build-nanjing-map-data.mjs
 ```
 
-## Drivable road graph (phase 2)
+## HUD / map anchors (bilingual `中文 · English`)
 
-- Graph built in `osmRoadGraph.ts` from drivable highways only (`drivableRoads.ts` excludes footway/path/steps/etc.).
-- Node snap **8 m** to close tile seams; largest connected component ~**97%** of nodes in the bundled graph (see `scripts/acceptance-smoke.mjs`).
-- Traffic AI uses the same graph; spawn snaps to nearest motorable polyline segment.
-
-## HUD / map anchors
-
-Always shown (bilingual labels `中文 · English`):
-
-- 新街口 · Xinjiekou  
-- 玄武湖岸 · Xuanwu Lake shore (OSM water centroid when bundle loaded)  
-- 明城墙（中山门） · Ming wall (Zhongshan Gate) — gate coords approximate; shoreline from OSM water  
-- 夫子庙 · Fuzimiao  
-- 秦淮河（夫子庙段） · Qinhuai River  
+| ID | Label |
+| --- | --- |
+| xinjiekou | 新街口 · Xinjiekou |
+| xuanwu-lake | 玄武湖岸 · Xuanwu Lake shore (OSM water centroid when available) |
+| ming-wall-zhongshan | 明城墙（中山门） · Ming wall (Zhongshan Gate) |
+| fuzimiao | 夫子庙 · Fuzimiao |
+| qinhuai-river | 秦淮河（夫子庙段） · Qinhuai River |
+| zijinshan | 紫金山 · Purple Mountain |
+| zhongshan-ling | 中山陵 · Sun Yat-sen Mausoleum |
+| ming-xiaoling | 明孝陵 · Ming Xiaoling Mausoleum |
 
 ## Approximate / simplified (checklist)
 
 | Item | Status |
 | --- | --- |
-| Building meshes | OSM footprints; **height estimated** when `height`/`levels` missing (default 12 m per manifest) |
-| Building colliders | **APPROXIMATE** coarse boxes, **tall (≥18 m) only**, to avoid blocking roads |
-| Building count cap | **1200** tallest footprints rendered (performance) |
-| Road driving surface | **APPROXIMATE** flat ribbons on DEM, not surveyed lane geometry |
-| Ming wall gate marker | **APPROXIMATE** point; no full wall mesh in phase 2 |
-| Interior / facades | Not modeled |
-| DEM | Low-resolution grid; not cadastral survey |
-| Harbor Row (`CityBuilder`) | **Disabled by default**; dev-only `?world=harbor` legacy switch |
+| 中山陵 / 明孝陵 / 紫金山 massing | **APPROXIMATE** LOD boxes/cone (`landmarkLod.ts`), not surveyed models |
+| Zijinshan forest cone | **APPROXIMATE** visual hint only |
+| Building meshes | OSM footprints; estimated height when tags missing |
+| Building colliders | Tall (≥18 m) only; coarse boxes |
+| Building render cap | 1600 tallest footprints |
+| Roads | Flat ribbons on DEM |
+| Ming wall | Point anchor + OSM water adjacency; no full wall mesh |
+| DEM | Low-resolution grid |
+| Harbor Row | Off by default; `?world=harbor` only |
 
 ## Legacy Harbor Row
 
-Procedural **Harbor Row** (`CityBuilder.ts`) is **not** a playable entry point. Use `?world=harbor` only for regression tests.
+`CityBuilder.ts` is **not** the default world. Use `?world=harbor` for regression only.
+
+## Local dev
+
+```bash
+npm install
+npm run dev
+```
+
+Open `http://127.0.0.1:4317` (default **Nanjing** — do not add `?world=harbor`). **Start Game** loads `core.bundle.json` and `NanjingWorldBuilder`.
+
+### Suggested screenshot camera poses (world XZ / yaw — tune in-game)
+
+| Scene | Suggested position (x, z) | Notes |
+| --- | --- | --- |
+| 中山陵 LOD | (~2100, 2200) look toward `zhongshan-ling` anchor | East on 陵园路; pitch slightly down |
+| 紫金山 | (~2300, 2600) wide shot toward `zijinshan` hill proxy | Shows forest cone + skyline |
+| 玄武湖 | (~1200, -400) toward `xuanwu-lake` anchor | North shore water OSM |
+| 夫子庙 / 秦淮 | (~-800, -2900) toward `fuzimiao` | South old town |
+| Driving | Road near spawn (~-1653, -715) in vehicle | 洪武路 near Xinjiekou |
+
+Coordinates are ENU meters from `CRS_ORIGIN` (32.048°N, 118.8°E); use the in-game map (M) to refine.
