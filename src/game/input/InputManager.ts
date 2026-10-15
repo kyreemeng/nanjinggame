@@ -1,9 +1,16 @@
+import { DEFAULT_BINDINGS, type GameAction } from './actions'
+
 export class InputManager {
   private keys = new Set<string>()
   private mouseDx = 0
   private mouseDy = 0
   private pointerLocked = false
   private enabled = true
+  private bindings: Record<GameAction, string> = { ...DEFAULT_BINDINGS }
+
+  setBindings(bindings: Record<GameAction, string>): void {
+    this.bindings = { ...DEFAULT_BINDINGS, ...bindings }
+  }
 
   attach(canvas: HTMLCanvasElement): () => void {
     const onKeyDown = (e: KeyboardEvent) => {
@@ -69,12 +76,22 @@ export class InputManager {
     return delta
   }
 
+  isAction(action: GameAction): boolean {
+    const code = this.bindings[action]
+    if (this.keys.has(code)) return true
+    if (action === 'steerLeft' && this.keys.has('ArrowLeft')) return true
+    if (action === 'steerRight' && this.keys.has('ArrowRight')) return true
+    if (action === 'accelerate' && this.keys.has('ArrowUp')) return true
+    if (action === 'reverse' && this.keys.has('ArrowDown')) return true
+    return false
+  }
+
   isDown(code: string): boolean {
     return this.keys.has(code)
   }
 
-  wasPressed(code: string): boolean {
-    return this.keys.has(code)
+  wasPressed(action: GameAction): boolean {
+    return this.isAction(action)
   }
 
   requestPointerLock(canvas: HTMLCanvasElement): void {

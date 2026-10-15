@@ -2,6 +2,12 @@ import { useEffect, useState } from 'react'
 import { DISTRICT_NAME, GAME_TITLE } from '../../game/constants'
 import { useGameStore } from '../../game/store/gameStore'
 import { applySaveToStore, hasSave, loadSave } from '../../storage/saveGame'
+import { ControlsHelpScreen } from './ControlsHelpScreen'
+import { MissionListScreen } from './MissionListScreen'
+import { playMenuClick } from './playClick'
+import { SettingsScreen } from './SettingsScreen'
+
+type SubScreen = null | 'missions' | 'settings' | 'controls'
 
 interface MainMenuProps {
   onStartSession: () => void
@@ -12,12 +18,18 @@ export function MainMenu({ onStartSession }: MainMenuProps) {
   const resetRun = useGameStore((s) => s.resetRun)
   const setNewGameSession = useGameStore((s) => s.setNewGameSession)
   const [canContinue, setCanContinue] = useState(false)
+  const [sub, setSub] = useState<SubScreen>(null)
 
   useEffect(() => {
     setCanContinue(hasSave())
   }, [])
 
+  if (sub === 'missions') return <MissionListScreen onBack={() => setSub(null)} />
+  if (sub === 'settings') return <SettingsScreen onBack={() => setSub(null)} />
+  if (sub === 'controls') return <ControlsHelpScreen onBack={() => setSub(null)} />
+
   const startNew = () => {
+    playMenuClick()
     resetRun()
     setNewGameSession(true)
     onStartSession()
@@ -25,6 +37,7 @@ export function MainMenu({ onStartSession }: MainMenuProps) {
   }
 
   const continueGame = () => {
+    playMenuClick()
     const save = loadSave()
     if (!save) return
     applySaveToStore(save)
@@ -32,12 +45,19 @@ export function MainMenu({ onStartSession }: MainMenuProps) {
     setPhase('playing')
   }
 
+  const nav = (screen: SubScreen) => {
+    playMenuClick()
+    setSub(screen)
+  }
+
   return (
-    <div className="menu-overlay">
-      <div className="menu-card">
+    <div className="menu-overlay menu-main">
+      <div className="menu-hero">
         <p className="menu-eyebrow">Open district action</p>
         <h1>{GAME_TITLE}</h1>
         <p className="menu-sub">{DISTRICT_NAME}</p>
+      </div>
+      <div className="menu-card menu-card-tech menu-actions">
         {canContinue && (
           <button type="button" className="menu-btn primary" onClick={continueGame}>
             Continue
@@ -50,7 +70,15 @@ export function MainMenu({ onStartSession }: MainMenuProps) {
         >
           {canContinue ? 'New Game' : 'Start Game'}
         </button>
-        <p className="menu-hint">WASD move · Shift run · E interact · Esc pause</p>
+        <button type="button" className="menu-btn" onClick={() => nav('missions')}>
+          Contracts
+        </button>
+        <button type="button" className="menu-btn" onClick={() => nav('settings')}>
+          Settings
+        </button>
+        <button type="button" className="menu-btn" onClick={() => nav('controls')}>
+          Controls
+        </button>
       </div>
     </div>
   )

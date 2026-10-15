@@ -29,7 +29,9 @@ export interface GameStoreState {
   newGameSession: boolean
   wantedStars: number
   npcPrompt: string | null
+  mapOpen: boolean
   setPhase: (phase: GamePhase) => void
+  setMapOpen: (open: boolean) => void
   setHud: (
     partial: Partial<
       Pick<
@@ -77,7 +79,9 @@ export const useGameStore = create<GameStoreState>((set) => ({
   newGameSession: true,
   wantedStars: 0,
   npcPrompt: null,
+  mapOpen: false,
   setPhase: (phase) => set({ phase }),
+  setMapOpen: (open) => set({ mapOpen: open }),
   setHud: (partial) => set(partial),
   setMissionSave: (slice) => set({ missionSave: slice }),
   setNewGameSession: (v) => set({ newGameSession: v }),
@@ -102,6 +106,7 @@ export const useGameStore = create<GameStoreState>((set) => ({
       newGameSession: true,
       wantedStars: 0,
       npcPrompt: null,
+      mapOpen: false,
       objective: 'Contract: First Steps',
     }),
 }))

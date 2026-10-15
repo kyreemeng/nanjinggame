@@ -9,12 +9,15 @@ import { buildCity } from './world/CityBuilder'
 import { createAtmosphere, updateSunShadowFocus, type AtmosphereHandles } from './world/atmosphere'
 import { DayNightCycle } from './world/dayNight'
 import { useGameStore } from './store/gameStore'
-import { loadSettings } from '../storage/settings'
+import { loadSettings, type GraphicsPreset } from '../storage/settings'
 import { VEHICLE_ENTER_DISTANCE } from './constants'
 import { TrafficSystem } from './ai/TrafficSystem'
 import { PedestrianSystem } from './ai/PedestrianSystem'
+import { PoliceSystem } from './ai/PoliceSystem'
 import { WantedSystem } from './systems/WantedSystem'
 import { MissionManager } from './missions/MissionManager'
+import { applyGraphicsPreset } from './graphics/applyGraphicsPreset'
+import { getAudioManager } from './audio/AudioManager'
 
 export type ControlMode = 'foot' | 'vehicle'
 
@@ -39,7 +42,9 @@ export class GameEngine {
   private traffic!: TrafficSystem
   private pedestrians!: PedestrianSystem
   private wanted = new WantedSystem()
+  private police!: PoliceSystem
   private missions!: MissionManager
+  private audio = getAudioManager()
   private lastPlayerPos = new THREE.Vector3()
   private movedThisFrame = 0
   private lookThisFrame = 0
@@ -82,7 +87,18 @@ export class GameEngine {
 
     this.traffic = new TrafficSystem(this.scene)
     this.pedestrians = new PedestrianSystem(this.scene)
+    this.police = new PoliceSystem(this.scene)
     this.missions = new MissionManager(this.scene)
+    this.syncSettings()
+    applyGraphicsPreset(
+      {
+        renderer: this.renderer,
+        scene: this.scene,
+        atmosphere: this.atmosphere,
+        camera: this.followCam.camera,
+      },
+      this.settings.graphics,
+    )
 
     const store = useGameStore.getState()
     this.missions.loadFromSave(store.missionSave, store.newGameSession)
@@ -116,8 +132,28 @@ export class GameEngine {
     this.detachInput?.()
     this.traffic.dispose()
     this.pedestrians.dispose()
+    this.police.dispose()
+    this.audio.dispose()
     this.physics.dispose()
     this.renderer.dispose()
+  }
+
+  applyGraphics(graphics: GraphicsPreset): void {
+    this.settings.graphics = graphics
+    applyGraphicsPreset(
+      {
+        renderer: this.renderer,
+        scene: this.scene,
+        atmosphere: this.atmosphere,
+        camera: this.followCam.camera,
+      },
+      graphics,
+    )
+  }
+
+  syncSettings(): void {
+    this.settings = loadSettings()
+    this.input.setBindings(this.settings.bindings)
   }
 
   private loop = (): void => {
@@ -127,25 +163,38 @@ export class GameEngine {
 
     const store = useGameStore.getState()
     if (store.phase === 'playing') {
+      this.syncSettings()
+      const mapOpen = store.mapOpen
+      if (mapOpen) {
+        this.input.setEnabled(false)
+      } else if (!this.input.isPointerLocked) {
+        this.input.setEnabled(true)
+      }
+
       this.movedThisFrame = 0
       this.lookThisFrame = 0
       this.talkedThisFrame = false
 
-      this.handleInteract(dt)
-      const { dx, dy } = this.input.consumeMouseDelta()
-      this.lookThisFrame = Math.abs(dx) + Math.abs(dy)
-
-      if (this.mode === 'foot') {
-        this.followCam.addMouseLook(dx, dy, this.settings.mouseSensitivity, this.settings.invertY)
-        const camYaw = this.followCam.getYaw()
-        this.player.update(dt, this.input, camYaw)
-      } else {
-        this.followCam.addMouseLook(dx, dy, this.settings.mouseSensitivity * 0.65, this.settings.invertY)
-        this.vehicle.update(dt, this.input)
+      if (!mapOpen) {
+        this.handleInteract(dt)
+        const { dx, dy } = this.input.consumeMouseDelta()
+        this.lookThisFrame = Math.abs(dx) + Math.abs(dy)
+        if (this.mode === 'foot') {
+          this.followCam.addMouseLook(dx, dy, this.settings.mouseSensitivity, this.settings.invertY)
+          const camYaw = this.followCam.getYaw()
+          this.player.update(dt, this.input, camYaw)
+        } else {
+          this.followCam.addMouseLook(
+            dx,
+            dy,
+            this.settings.mouseSensitivity * 0.65,
+            this.settings.invertY,
+          )
+          this.vehicle.update(dt, this.input)
+        }
+        this.vehicle.syncMesh()
+        this.physics.step(dt)
       }
-      this.vehicle.syncMesh()
-
-      this.physics.step(dt)
 
       const target =
         this.mode === 'foot'
@@ -171,8 +220,11 @@ export class GameEngine {
         wantedStars: this.wanted.getState().tier,
       })
 
-      this.traffic.tick(dt, playerPos)
-      this.pedestrians.tick(dt, playerPos)
+      if (!mapOpen) {
+        this.traffic.tick(dt, playerPos)
+        this.pedestrians.tick(dt, playerPos)
+      }
+      this.police.tick(dt, playerPos, this.wanted.getState().tier)
 
       if (this.mode === 'vehicle' && speedKmh > 10) {
         for (const carPos of this.traffic.getCarPositions()) {
@@ -196,6 +248,8 @@ export class GameEngine {
 
       useGameStore.getState().setMissionSave(this.missions.getSaveSlice())
 
+      this.audio.updateEngine(this.mode === 'vehicle', speedKmh)
+
       updateSunShadowFocus(this.atmosphere.sun, playerPos)
       this.dayNight.update(dt, this.atmosphere, this.scene)
     }
@@ -207,7 +261,7 @@ export class GameEngine {
   private handleInteract(dt: number): void {
     this.interactCooldown = Math.max(0, this.interactCooldown - dt)
     if (this.interactCooldown > 0) return
-    if (!this.input.wasPressed('KeyE')) return
+    if (!this.input.wasPressed('interact')) return
 
     if (this.mode === 'foot') {
       const dist = this.player.position.distanceTo(this.vehicle.position)

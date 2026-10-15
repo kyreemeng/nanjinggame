@@ -1,6 +1,7 @@
 import type { MissionSaveSlice } from '../game/missions/MissionManager'
-import { loadSettings, saveSettings, type GameSettings } from './settings'
+import { saveSettings, type GameSettings } from './settings'
 import { useGameStore } from '../game/store/gameStore'
+import { useSettingsStore } from '../game/store/settingsStore'
 
 const SAVE_KEY = 'ashline-save-v1'
 
@@ -33,14 +34,24 @@ export function loadSave(): GameSave | null {
 
 export function saveGame(): void {
   const state = useGameStore.getState()
+  const settings = useSettingsStore.getState()
   const payload: GameSave = {
     version: 1,
     money: state.money,
     health: state.health,
     missions: state.missionSave,
-    settings: loadSettings(),
+    settings: {
+      masterVolume: settings.masterVolume,
+      sfxVolume: settings.sfxVolume,
+      musicVolume: settings.musicVolume,
+      mouseSensitivity: settings.mouseSensitivity,
+      invertY: settings.invertY,
+      graphics: settings.graphics,
+      bindings: settings.bindings,
+    },
     savedAt: Date.now(),
   }
+  saveSettings(payload.settings)
   localStorage.setItem(SAVE_KEY, JSON.stringify(payload))
   state.setHud({ missionToast: 'Progress saved.' })
 }
@@ -52,6 +63,7 @@ export function applySaveToStore(save: GameSave): void {
     missionSave: save.missions,
   })
   saveSettings(save.settings)
+  useSettingsStore.getState().hydrate()
 }
 
 export function clearSave(): void {

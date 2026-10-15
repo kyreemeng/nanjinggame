@@ -1,4 +1,5 @@
 import * as THREE from 'three'
+import { getAudioManager } from '../audio/AudioManager'
 import { useGameStore } from '../store/gameStore'
 import { LANDMARKS, MISSIONS, missionById, type MissionDef } from './missionDefinitions'
 import type { MissionState } from './types'
@@ -172,6 +173,7 @@ export class MissionManager {
   private complete(def: MissionDef): void {
     this.completed.add(def.id)
     const money = useGameStore.getState().money + def.reward
+    getAudioManager().playMissionComplete()
     useGameStore.getState().setHud({
       money,
       missionToast: `Contract complete: ${def.title} (+$${def.reward})`,

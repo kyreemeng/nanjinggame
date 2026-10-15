@@ -1,6 +1,7 @@
 import { useEffect, useRef } from 'react'
 import { GameEngine } from '../game/GameEngine'
 import { useGameStore } from '../game/store/gameStore'
+import { useSettingsStore } from '../game/store/settingsStore'
 
 export function GameView() {
   const canvasRef = useRef<HTMLCanvasElement>(null)
@@ -13,6 +14,7 @@ export function GameView() {
 
     const engine = new GameEngine(canvas)
     engineRef.current = engine
+
     engine.start().catch((err) => {
       console.error('Failed to start game', err)
     })
@@ -20,8 +22,15 @@ export function GameView() {
     const onResize = () => engine.onResize()
     window.addEventListener('resize', onResize)
 
+    const unsubSettings = useSettingsStore.subscribe((state, prev) => {
+      if (state.graphics !== prev.graphics) {
+        engineRef.current?.applyGraphics(state.graphics)
+      }
+    })
+
     return () => {
       window.removeEventListener('resize', onResize)
+      unsubSettings()
       engine.stop()
       engineRef.current = null
     }

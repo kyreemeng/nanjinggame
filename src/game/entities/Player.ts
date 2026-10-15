@@ -66,19 +66,19 @@ export class Player {
 
     let moveX = 0
     let moveZ = 0
-    if (input.isDown('KeyW')) {
+    if (input.isAction('forward')) {
       moveX += forward.x
       moveZ += forward.z
     }
-    if (input.isDown('KeyS')) {
+    if (input.isAction('back')) {
       moveX -= forward.x
       moveZ -= forward.z
     }
-    if (input.isDown('KeyA')) {
+    if (input.isAction('left')) {
       moveX -= right.x
       moveZ -= right.z
     }
-    if (input.isDown('KeyD')) {
+    if (input.isAction('right')) {
       moveX += right.x
       moveZ += right.z
     }
@@ -86,7 +86,8 @@ export class Player {
     const moveDir = new THREE.Vector3(moveX, 0, moveZ)
     if (moveDir.lengthSq() > 0) moveDir.normalize()
 
-    const speed = input.isDown('ShiftLeft') || input.isDown('ShiftRight') ? RUN_SPEED : WALK_SPEED
+    const speed =
+      input.isAction('run') || input.isDown('ShiftRight') ? RUN_SPEED : WALK_SPEED
     const desired = moveDir.multiplyScalar(speed)
 
     const current = this.body.linvel()
@@ -94,7 +95,7 @@ export class Player {
     const blend = 1 - Math.exp(-12 * dt)
     horizontal.lerp(desired, blend)
 
-    if (this.grounded && input.isDown('Space')) {
+    if (this.grounded && input.isAction('jump')) {
       this.verticalVelocity = JUMP_VELOCITY
       this.grounded = false
     }

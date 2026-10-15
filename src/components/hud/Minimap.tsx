@@ -1,17 +1,27 @@
 import { useGameStore } from '../../game/store/gameStore'
 import { WORLD_SIZE } from '../../game/constants'
+import { playMenuClick } from '../menus/playClick'
 
 export function Minimap() {
   const x = useGameStore((s) => s.playerX)
   const z = useGameStore((s) => s.playerZ)
   const yaw = useGameStore((s) => s.compassDeg)
   const markers = useGameStore((s) => s.mapMarkers)
+  const setMapOpen = useGameStore((s) => s.setMapOpen)
 
   const size = 120
   const half = WORLD_SIZE / 2
 
   return (
-    <div className="minimap">
+    <div
+      className="minimap minimap-clickable"
+      onClick={() => {
+        playMenuClick()
+        setMapOpen(true)
+        if (document.pointerLockElement) document.exitPointerLock()
+      }}
+      title="Open district map"
+    >
       <div className="minimap-grid" style={{ width: size, height: size }}>
         {markers.map((m, i) => {
           const px = ((m.x + half) / WORLD_SIZE) * size

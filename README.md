@@ -60,7 +60,7 @@ npm run preview
 - **Performance**: shared materials, `InstancedMesh` props, emissive lamps instead of hundreds of lights.
 - **Hooks**: `DayNightCycle` (off by default), traffic/pedestrian/wanted stubs wired in the engine tick.
 
-## Phase 3 (this build)
+## Phase 3 (complete)
 
 - **Traffic AI**: up to 18 vehicles follow the intersection road graph, yield at junctions, despawn beyond ~130 m.
 - **Pedestrians**: sidewalk loops, walk/idle, greet + **E** to chat; capped spawn with distance culling.
@@ -73,11 +73,18 @@ npm run preview
 - **Save**: `localStorage` — **Continue** / **Save Game** (pause menu); stores money, health, mission progress.
 - **Wanted (light)**: heat rises if you ram traffic at speed; 0–5 stars on HUD (police chase deferred).
 
-## Next (Phase 4+)
+## Phase 4 (this build)
 
-- Police pursuit AI tied to wanted tier
-- Mission board UI, more contracts, failure/retry polish
-- Day/night gameplay, quality presets, IndexedDB if saves grow
+- **Menus**: main hub (Start / Continue / Contracts / Settings / Controls), pause menu with Save, mission list bound to live save state.
+- **District map** (`M` or click minimap): zones, roads, player heading, objective markers — synced with HUD minimap.
+- **Settings** (persist in save + `ashline-settings-v2`): graphics Low/Med/High, master/SFX/music volume, mouse sens, invert Y, key rebinding.
+- **Audio**: Web Audio UI clicks, mission complete chime, procedural engine hum while driving (fails soft if blocked).
+- **HUD**: tech/cinematic panels, analog speedometer, heat stars, accurate FPS/stats.
+- **Police chase (light)**: up to 2 units pursue when heat ≥ 2 (full pursuit AI still expandable).
+
+## Next
+
+- Deeper police AI, mission failure/retry UX, music beds, IndexedDB if saves grow
 
 ## Stack
 

@@ -1,6 +1,9 @@
+import { useSettingsStore } from '../../game/store/settingsStore'
 import { useGameStore } from '../../game/store/gameStore'
+import { formatKeyCode } from '../../game/input/actions'
 import { Minimap } from './Minimap'
 import { MissionToast } from './MissionToast'
+import { Speedometer } from './Speedometer'
 
 export function HUD() {
   const health = useGameStore((s) => s.health)
@@ -14,6 +17,7 @@ export function HUD() {
   const timer = useGameStore((s) => s.missionTimerSec)
   const wanted = useGameStore((s) => s.wantedStars)
   const npcPrompt = useGameStore((s) => s.npcPrompt)
+  const mapKey = useSettingsStore((s) => formatKeyCode(s.bindings.map))
 
   const heading =
     compass < 22.5 || compass >= 337.5
@@ -33,7 +37,7 @@ export function HUD() {
                   : 'NW'
 
   return (
-    <div className="hud">
+    <div className="hud hud-tech">
       <MissionToast />
       <div className="hud-top">
         <Minimap />
@@ -43,35 +47,42 @@ export function HUD() {
         </div>
         {timer !== null && <div className="mission-timer">{timer}s</div>}
         <div className="wanted" aria-label={`Heat level ${wanted}`}>
+          <span className="wanted-label">HEAT</span>
           {'★'.repeat(wanted)}
           <span className="wanted-dim">{'★'.repeat(5 - wanted)}</span>
         </div>
         <div className="fps">{fps} FPS</div>
       </div>
 
-      <div className="hud-bottom">
-        <div className="stat-row">
-          <span>Health</span>
-          <div className="bar">
-            <div className="bar-fill health" style={{ width: `${health}%` }} />
+      <div className="hud-right">
+        {driving && <Speedometer speedKmh={speed} />}
+      </div>
+
+      <div className="hud-bottom panel-tech">
+        <div className="hud-stats-row">
+          <div className="stat-chip">
+            <span className="chip-label">HP</span>
+            <div className="bar">
+              <div className="bar-fill health" style={{ width: `${health}%` }} />
+            </div>
+            <span>{health}</span>
           </div>
-          <span>{health}</span>
-        </div>
-        <div className="stat-row">
-          <span>Credits</span>
-          <strong>${money}</strong>
+          <div className="stat-chip money-chip">
+            <span className="chip-label">CR</span>
+            <strong>${money}</strong>
+          </div>
         </div>
         <div className="objective">
           <span>Objective</span>
           <p>{objective}</p>
         </div>
-        {driving ? (
-          <div className="speed-readout">{Math.round(speed)} km/h</div>
-        ) : canEnter ? (
+        {driving ? null : canEnter ? (
           <div className="prompt">Press E to enter vehicle</div>
         ) : npcPrompt ? (
           <div className="prompt">{npcPrompt} — Press E to chat</div>
-        ) : null}
+        ) : (
+          <div className="prompt subtle">{mapKey} district map</div>
+        )}
       </div>
     </div>
   )

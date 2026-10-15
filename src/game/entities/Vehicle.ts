@@ -99,11 +99,11 @@ export class Vehicle {
   }
 
   update(dt: number, input: InputManager): void {
-    const forward = input.isDown('KeyW') || input.isDown('ArrowUp')
-    const reverse = input.isDown('KeyS') || input.isDown('ArrowDown')
-    const brake = input.isDown('Space')
-    const left = input.isDown('KeyA') || input.isDown('ArrowLeft')
-    const right = input.isDown('KeyD') || input.isDown('ArrowRight')
+    const forward = input.isAction('accelerate')
+    const reverse = input.isAction('reverse')
+    const brake = input.isAction('brake')
+    const left = input.isAction('steerLeft')
+    const right = input.isAction('steerRight')
 
     let accel = 0
     if (forward) accel += VEHICLE_ACCEL
