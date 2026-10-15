@@ -1,12 +1,14 @@
 export const GAME_TITLE = 'Ashline'
-export const DISTRICT_NAME = 'Harbor Row'
+/** Active playable slice: OSM-verified Nanjing core (see map-data/coordinate-system). */
+export const DISTRICT_NAME = 'Nanjing Verified Core'
 
 export const BLOCK_SIZE = 40
 export const ROAD_WIDTH = 11
 export const BOULEVARD_WIDTH = 16
 export const GRID_COLS = 7
 export const GRID_ROWS = 6
-export const WORLD_SIZE = 400
+/** Sky / fallback extent — matches verified-core bbox diagonal (~4.7 km). */
+export const WORLD_SIZE = 4800
 export const WORLD_HALF = WORLD_SIZE / 2
 
 export const PLAYER_HEIGHT = 1.75

@@ -17,13 +17,27 @@ export interface PlayableBbox {
   maxLon: number
 }
 
-/** Nanjing core: Xuanwu Lake — city wall — Fuzimiao — Laomendong — Xinjiekou */
+/**
+ * Phase-1 verified core: continuous drivable slice (新街口—中山路—玄武湖南缘—夫子庙北缘).
+ * Smaller than full “old town” vision; distances are not compressed.
+ */
+export const NANJING_VERIFIED_CORE_BBOX: PlayableBbox = {
+  minLat: 32.018,
+  maxLat: 32.058,
+  minLon: 118.768,
+  maxLon: 118.818,
+}
+
+/** Future expansion bbox (not loaded in v1). */
 export const NANJING_PLAYABLE_BBOX: PlayableBbox = {
   minLat: 32.008,
   maxLat: 32.088,
   minLon: 118.748,
   maxLon: 118.852,
 }
+
+/** Active world uses verified core only. */
+export const ACTIVE_WORLD_BBOX = NANJING_VERIFIED_CORE_BBOX
 
 export const CRS_ORIGIN: GeoPoint = {
   lat: 32.048,

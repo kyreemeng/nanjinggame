@@ -1,8 +1,8 @@
 export type Locale = 'en' | 'zh'
 
 const en = {
-  'brand.eyebrow': 'Open district action',
-  'brand.district': 'Harbor Row',
+  'brand.eyebrow': 'Real-world open world',
+  'brand.district': 'Nanjing Verified Core',
   'menu.continue': 'Continue',
   'menu.newGame': 'New Game',
   'menu.startGame': 'Start Game',
@@ -51,13 +51,13 @@ const en = {
   'mission.tutorial.title': 'First Steps',
   'mission.tutorial.description': 'Learn to move, look, and talk to locals.',
   'mission.courier-run.title': 'Courier Run',
-  'mission.courier-run.description': 'Take the coupe to the Glass Spire drop-off.',
+  'mission.courier-run.description': 'Drive to Fuzimiao (Confucius Temple) drop-off.',
   'mission.rush-delivery.title': 'Rush Delivery',
-  'mission.rush-delivery.description': 'Reach South Pier before the tide window closes.',
-  'mission.landmark-tour.title': 'Harbor Row Tour',
-  'mission.landmark-tour.description': 'Discover four district landmarks on foot or by car.',
+  'mission.rush-delivery.description': 'Reach Xuanwu Lake shore before time runs out.',
+  'mission.landmark-tour.title': 'Nanjing Core Tour',
+  'mission.landmark-tour.description': 'Visit four OSM-verified landmarks on foot or by car.',
 
-  'mission.allComplete': 'All contracts complete — free roam Harbor Row.',
+  'mission.allComplete': 'All contracts complete — free roam the verified core.',
   'mission.tutorial.walk': '{title}: Walk around ({meters}/12 m)',
   'mission.tutorial.look': '{title}: Look around with the mouse',
   'mission.tutorial.talk': '{title}: Press E near a pedestrian to chat',
@@ -67,10 +67,10 @@ const en = {
   'mission.complete': 'Contract complete: {title} (+${reward})',
   'mission.fail.timeExpired': 'Time expired — contract failed.',
 
-  'landmark.spire': 'Glass Spire Plaza',
-  'landmark.pier': 'South Pier',
-  'landmark.yards': 'East Freight Yards',
-  'landmark.grove': 'Rowan Grove Park',
+  'landmark.xinjiekou': 'Xinjiekou',
+  'landmark.fuzimiao': 'Fuzimiao (Confucius Temple)',
+  'landmark.xuanwu-lake': 'Xuanwu Lake shore',
+  'landmark.laomendong': 'Laomendong',
 
   'hud.objective': 'Objective',
   'hud.heat': 'HEAT',
@@ -113,11 +113,11 @@ const en = {
 
   'save.progressSaved': 'Progress saved.',
   'npc.chatToast': 'You exchanged a quick word.',
-  'npc.tutorialGreet': 'Welcome to Harbor Row — press E to chat.',
-  'npc.greet0': 'Morning — mind the boulevard traffic.',
-  'npc.greet1': "Courier lane's busy today.",
-  'npc.greet2': 'Harbor Row never sleeps.',
-  'npc.greet3': 'Watch for trams near the pier.',
+  'npc.tutorialGreet': 'Welcome to Nanjing — press E to chat.',
+  'npc.greet0': 'Morning — mind the Zhongshan Road traffic.',
+  'npc.greet1': "Xinjiekou's busy today.",
+  'npc.greet2': 'The old city never sleeps.',
+  'npc.greet3': 'Watch for bikes near the Qinhuai.',
 
   'action.forward': 'Move forward',
   'action.back': 'Move back',
@@ -135,8 +135,8 @@ const en = {
 } as const
 
 const zh: Record<keyof typeof en, string> = {
-  'brand.eyebrow': '开放街区动作',
-  'brand.district': '港湾街',
+  'brand.eyebrow': '真实地理开放世界',
+  'brand.district': '南京验证核心区',
   'menu.continue': '继续游戏',
   'menu.newGame': '新游戏',
   'menu.startGame': '开始游戏',
@@ -185,13 +185,13 @@ const zh: Record<keyof typeof en, string> = {
   'mission.tutorial.title': '第一步',
   'mission.tutorial.description': '学习移动、环顾四周并与路人交谈。',
   'mission.courier-run.title': '快递任务',
-  'mission.courier-run.description': '驾驶轿跑将包裹送到玻璃尖塔广场。',
+  'mission.courier-run.description': '驾车将包裹送到夫子庙。',
   'mission.rush-delivery.title': '限时配送',
-  'mission.rush-delivery.description': '在潮汐窗口关闭前抵达南码头。',
-  'mission.landmark-tour.title': '港湾街巡游',
-  'mission.landmark-tour.description': '步行或驾车发现四处地标。',
+  'mission.rush-delivery.description': '在时间耗尽前抵达玄武湖岸。',
+  'mission.landmark-tour.title': '南京核心巡游',
+  'mission.landmark-tour.description': '步行或驾车拜访四处 OSM 核验地标。',
 
-  'mission.allComplete': '全部合约完成 — 自由探索港湾街。',
+  'mission.allComplete': '全部合约完成 — 自由探索验证核心区。',
   'mission.tutorial.walk': '{title}：四处走动（{meters}/12 米）',
   'mission.tutorial.look': '{title}：用鼠标环顾四周',
   'mission.tutorial.talk': '{title}：靠近行人按 E 交谈',
@@ -201,10 +201,10 @@ const zh: Record<keyof typeof en, string> = {
   'mission.complete': '合约完成：{title}（+${reward}）',
   'mission.fail.timeExpired': '时间耗尽 — 合约失败。',
 
-  'landmark.spire': '玻璃尖塔广场',
-  'landmark.pier': '南码头',
-  'landmark.yards': '东货运场',
-  'landmark.grove': '罗文树林公园',
+  'landmark.xinjiekou': '新街口',
+  'landmark.fuzimiao': '夫子庙',
+  'landmark.xuanwu-lake': '玄武湖岸',
+  'landmark.laomendong': '老门东',
 
   'hud.objective': '目标',
   'hud.heat': '热度',
@@ -213,7 +213,7 @@ const zh: Record<keyof typeof en, string> = {
   'hud.fps': '帧率',
   'hud.enterVehicle': '按 E 上车',
   'hud.chatPrompt': '— 按 E 交谈',
-  'hud.mapPrompt': '{key} 港区地图',
+  'hud.mapPrompt': '{key} 城区地图',
   'hud.speedUnit': '公里/时',
   'hud.speedAria': '时速 {speed} 公里',
 
@@ -226,7 +226,7 @@ const zh: Record<keyof typeof en, string> = {
   'compass.W': '西',
   'compass.NW': '西北',
 
-  'map.title': '港区地图',
+  'map.title': '城区地图',
   'map.close': '关闭 (M)',
   'map.objective': '目标点',
   'map.footer': '{district} · {size}米',
@@ -247,11 +247,11 @@ const zh: Record<keyof typeof en, string> = {
 
   'save.progressSaved': '进度已保存。',
   'npc.chatToast': '你和路人简短聊了几句。',
-  'npc.tutorialGreet': '欢迎来到港湾街 — 按 E 交谈。',
-  'npc.greet0': '早上好 — 小心林荫大道上的车流。',
-  'npc.greet1': '今天快递道很挤。',
-  'npc.greet2': '港湾街从不打烊。',
-  'npc.greet3': '码头附近有电车，注意避让。',
+  'npc.tutorialGreet': '欢迎来到南京 — 按 E 交谈。',
+  'npc.greet0': '早上好 — 小心中山路车流。',
+  'npc.greet1': '今天新街口很挤。',
+  'npc.greet2': '老城从不打烊。',
+  'npc.greet3': '秦淮河边骑车的人多，注意避让。',
 
   'action.forward': '前进',
   'action.back': '后退',

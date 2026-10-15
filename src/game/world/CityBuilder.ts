@@ -1,3 +1,4 @@
+/** Legacy Harbor Row procedural city — not used when Nanjing verified core is the default world. */
 import * as THREE from 'three'
 import { BLOCK_SIZE, GRID_COLS, GRID_ROWS, ROAD_WIDTH, WORLD_HALF } from '../constants'
 import type { ColliderBox } from '../physics/PhysicsWorld'

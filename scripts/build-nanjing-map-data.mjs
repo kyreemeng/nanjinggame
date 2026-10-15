@@ -6,9 +6,10 @@ import { mkdir, writeFile } from 'node:fs/promises'
 import path from 'node:path'
 
 const OUT = path.join('public', 'map-data', 'nanjing-core')
-const BBOX = { minLat: 32.008, maxLat: 32.088, minLon: 118.748, maxLon: 118.852 }
+/** Must match ACTIVE_WORLD_BBOX in coordinate-system.ts */
+const BBOX = { minLat: 32.018, maxLat: 32.058, minLon: 118.768, maxLon: 118.818 }
 const ORIGIN = { lat: 32.048, lon: 118.8, elevation: 15 }
-const TILE = 0.032
+const TILE = 0.025
 const USER_AGENT = 'AshlineNanjingMapBuild/1.0 (educational)'
 
 const DEG_TO_M_LAT = 111_320

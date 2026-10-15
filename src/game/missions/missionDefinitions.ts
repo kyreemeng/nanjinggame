@@ -1,4 +1,4 @@
-import { blockCenter } from '../world/RoadNetwork'
+import { landmarkWorldPosition } from '../../map-data/landmarks'
 
 export type MissionKind =
   | 'tutorial'
@@ -15,11 +15,17 @@ export interface MissionDef {
   landmarkIds?: string[]
 }
 
+function lm(id: string): { x: number; z: number } {
+  const p = landmarkWorldPosition(id)
+  if (!p) throw new Error(`Unknown landmark: ${id}`)
+  return { x: p.x, z: p.z }
+}
+
 export const LANDMARKS: Record<string, { x: number; z: number }> = {
-  spire: blockCenter(3, 5),
-  pier: blockCenter(1, 0),
-  yards: blockCenter(6, 2),
-  grove: blockCenter(1, 1),
+  xinjiekou: lm('xinjiekou'),
+  fuzimiao: lm('fuzimiao'),
+  'xuanwu-lake': lm('xuanwu-lake'),
+  laomendong: lm('laomendong'),
 }
 
 export const MISSIONS: MissionDef[] = [
@@ -32,20 +38,20 @@ export const MISSIONS: MissionDef[] = [
     id: 'courier-run',
     kind: 'drive-to',
     reward: 150,
-    destination: { ...blockCenter(3, 5), landmarkId: 'spire' },
+    destination: { ...lm('fuzimiao'), landmarkId: 'fuzimiao' },
   },
   {
     id: 'rush-delivery',
     kind: 'timed-drive',
     reward: 220,
-    timeLimitSec: 75,
-    destination: { ...blockCenter(1, 0), landmarkId: 'pier' },
+    timeLimitSec: 120,
+    destination: { ...lm('xuanwu-lake'), landmarkId: 'xuanwu-lake' },
   },
   {
     id: 'landmark-tour',
     kind: 'landmarks',
     reward: 260,
-    landmarkIds: ['spire', 'pier', 'yards', 'grove'],
+    landmarkIds: ['xinjiekou', 'fuzimiao', 'xuanwu-lake', 'laomendong'],
   },
 ]
 

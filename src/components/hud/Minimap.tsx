@@ -1,5 +1,5 @@
 import { useGameStore } from '../../game/store/gameStore'
-import { WORLD_SIZE } from '../../game/constants'
+import { ACTIVE_MAP_BOUNDS } from '../../game/world/activeMapBounds'
 import { playMenuClick } from '../menus/playClick'
 
 export function Minimap() {
@@ -10,7 +10,7 @@ export function Minimap() {
   const setMapOpen = useGameStore((s) => s.setMapOpen)
 
   const size = 120
-  const half = WORLD_SIZE / 2
+  const bounds = ACTIVE_MAP_BOUNDS
 
   return (
     <div
@@ -24,8 +24,8 @@ export function Minimap() {
     >
       <div className="minimap-grid" style={{ width: size, height: size }}>
         {markers.map((m, i) => {
-          const px = ((m.x + half) / WORLD_SIZE) * size
-          const py = ((m.z + half) / WORLD_SIZE) * size
+          const px = ((m.x - bounds.minX) / bounds.width) * size
+          const py = ((m.z - bounds.minZ) / bounds.depth) * size
           return (
             <div
               key={`${m.x}-${m.z}-${i}`}
@@ -38,8 +38,8 @@ export function Minimap() {
         <div
           className="minimap-player"
           style={{
-            left: ((x + half) / WORLD_SIZE) * size,
-            top: ((z + half) / WORLD_SIZE) * size,
+            left: ((x - bounds.minX) / bounds.width) * size,
+            top: ((z - bounds.minZ) / bounds.depth) * size,
             transform: `translate(-50%, -50%) rotate(${yaw}deg)`,
           }}
         />

@@ -1,11 +1,11 @@
 import * as THREE from 'three'
-import { WORLD_SIZE } from './constants'
 import { Player } from './entities/Player'
 import { Vehicle } from './entities/Vehicle'
 import { FollowCamera } from './camera/FollowCamera'
 import { InputManager } from './input/InputManager'
 import { PhysicsWorld } from './physics/PhysicsWorld'
-import { buildCity } from './world/CityBuilder'
+import { loadNanjingMapBundle } from '../map-data/loadNanjingMap'
+import { buildNanjingWorld } from './world/nanjing/NanjingWorldBuilder'
 import { createAtmosphere, updateSunShadowFocus, type AtmosphereHandles } from './world/atmosphere'
 import { DayNightCycle } from './world/dayNight'
 import { useGameStore } from './store/gameStore'
@@ -78,9 +78,15 @@ export class GameEngine {
 
     this.physics = new PhysicsWorld()
     await this.physics.init()
-    this.physics.addGround(WORLD_SIZE)
 
-    const city = buildCity()
+    const bundle = await loadNanjingMapBundle()
+    const city = buildNanjingWorld(bundle)
+    this.physics.addGroundExtent(
+      city.bounds.centerX,
+      city.bounds.centerZ,
+      city.bounds.width + 48,
+      city.bounds.depth + 48,
+    )
     this.scene.add(city.group)
     for (const box of city.colliders) {
       this.physics.addStaticBox(box)

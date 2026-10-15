@@ -1,4 +1,5 @@
 import type { MissionSaveSlice } from '../game/missions/MissionManager'
+import { landmarkWorldPosition } from '../map-data/landmarks'
 import { t } from '../i18n'
 import { loadSettings, saveSettings, type GameSettings } from './settings'
 import { useGameStore } from '../game/store/gameStore'
@@ -54,9 +55,10 @@ export function loadSave(): GameSave | null {
 }
 
 export function defaultWorldPose(): WorldPose {
+  const base = landmarkWorldPosition('xinjiekou') ?? { x: 0, y: 0, z: 0 }
   return {
-    player: { x: -12, y: 1.1, z: 8 },
-    vehicle: { x: -8, y: 0.65, z: 14, yaw: 0 },
+    player: { x: base.x - 8, y: 16.1, z: base.z + 6 },
+    vehicle: { x: base.x + 12, y: 15.65, z: base.z - 10, yaw: 0 },
     mode: 'foot',
   }
 }

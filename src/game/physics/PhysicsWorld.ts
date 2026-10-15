@@ -32,12 +32,16 @@ export class PhysicsWorld {
   }
 
   addGround(size: number): void {
+    this.addGroundExtent(0, 0, size, size)
+  }
+
+  addGroundExtent(centerX: number, centerZ: number, width: number, depth: number): void {
     const bodyDesc = RAPIER.RigidBodyDesc.fixed()
     const body = this.world.createRigidBody(bodyDesc)
-    const collider = RAPIER.ColliderDesc.cuboid(size / 2, 0.15, size / 2).setTranslation(
-      0,
+    const collider = RAPIER.ColliderDesc.cuboid(width / 2, 0.15, depth / 2).setTranslation(
+      centerX,
       -0.15,
-      0,
+      centerZ,
     )
     this.world.createCollider(collider, body)
     this.staticBodies.push(body)

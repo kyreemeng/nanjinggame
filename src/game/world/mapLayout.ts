@@ -1,7 +1,7 @@
-import { BLOCK_SIZE, GRID_COLS, GRID_ROWS, ROAD_WIDTH, WORLD_HALF, WORLD_SIZE } from '../constants'
-import { getZone, type ZoneType } from './districtMap'
-import { blockCenter, gridOffsetX, gridOffsetZ } from './RoadNetwork'
+import { ACTIVE_MAP_BOUNDS } from './activeMapBounds'
 import { getRoadGraph } from './roadGraph'
+
+export type ZoneType = 'downtown' | 'residential' | 'industrial' | 'mixed' | 'waterfront' | 'park'
 
 export interface MapZoneRect {
   x: number
@@ -34,22 +34,17 @@ export function getZoneColor(zone: ZoneType): string {
 }
 
 export function buildMapZones(): MapZoneRect[] {
-  const pad = ROAD_WIDTH / 2 + 2
-  const padSize = BLOCK_SIZE - pad * 2
-  const rects: MapZoneRect[] = []
-  for (let gz = 0; gz < GRID_ROWS; gz++) {
-    for (let gx = 0; gx < GRID_COLS; gx++) {
-      const { x, z } = blockCenter(gx, gz)
-      rects.push({
-        x: x - padSize / 2,
-        z: z - padSize / 2,
-        w: padSize,
-        h: padSize,
-        zone: getZone(gx, gz),
-      })
-    }
-  }
-  return rects
+  const b = ACTIVE_MAP_BOUNDS
+  return [
+    {
+      x: b.minX,
+      z: b.minZ,
+      w: b.width,
+      h: b.depth,
+      zone: 'mixed',
+      label: 'verified-core',
+    },
+  ]
 }
 
 export function buildMapRoads(): MapRoadSegment[] {
@@ -63,27 +58,33 @@ export function buildMapRoads(): MapRoadSegment[] {
       z1: a.z,
       x2: b.x,
       z2: b.z,
-      major: a.gx === 3 || b.gx === 3 || a.gz === 3 || b.gz === 3,
+      major: edge.length > 80,
     })
   }
   return segments
 }
 
 export function worldToMapPx(x: number, z: number, size: number): { px: number; py: number } {
+  const b = ACTIVE_MAP_BOUNDS
   return {
-    px: ((x + WORLD_HALF) / WORLD_SIZE) * size,
-    py: ((z + WORLD_HALF) / WORLD_SIZE) * size,
+    px: ((x - b.minX) / b.width) * size,
+    py: ((z - b.minZ) / b.depth) * size,
   }
 }
 
 export function mapLegend(): { zone: ZoneType }[] {
-  return [
-    { zone: 'downtown' },
-    { zone: 'residential' },
-    { zone: 'industrial' },
-    { zone: 'waterfront' },
-    { zone: 'park' },
-  ]
+  return [{ zone: 'mixed' }]
 }
 
-export { gridOffsetX, gridOffsetZ, WORLD_HALF, WORLD_SIZE }
+export const WORLD_SIZE = Math.max(ACTIVE_MAP_BOUNDS.width, ACTIVE_MAP_BOUNDS.depth)
+export const WORLD_HALF = WORLD_SIZE / 2
+
+/** @deprecated Harbor Row grid helpers — procedural city not used as default world. */
+export function gridOffsetX(): number {
+  return 0
+}
+
+/** @deprecated Harbor Row grid helpers — procedural city not used as default world. */
+export function gridOffsetZ(): number {
+  return 0
+}
