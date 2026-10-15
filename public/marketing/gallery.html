@@ -1,0 +1,122 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=1920, height=1080" />
+    <title>Ashline Marketing Gallery</title>
+    <style>
+      * { box-sizing: border-box; margin: 0; }
+      html, body { width: 1920px; height: 1080px; overflow: hidden; background: #0c1016; font-family: system-ui, sans-serif; color: #f2f5f8; }
+      #canvas-wrap { position: absolute; inset: 0; }
+      canvas { display: block; width: 1920px; height: 1080px; }
+      .hud-mock {
+        position: absolute; inset: 0; pointer-events: none; padding: 24px;
+        display: flex; flex-direction: column; justify-content: space-between;
+      }
+      .hud-top { display: flex; gap: 16px; align-items: flex-start; }
+      .panel { background: rgba(8,12,18,.78); border: 1px solid rgba(95,212,255,.22); border-radius: 12px; padding: 12px 14px; }
+      .minimap { width: 132px; height: 132px; background: #1a2430; border-radius: 8px; position: relative; }
+      .minimap::after { content: ''; position: absolute; left: 50%; top: 55%; width: 0; height: 0; border-left: 6px solid transparent; border-right: 6px solid transparent; border-bottom: 14px solid #5fd4ff; transform: translate(-50%,-50%); }
+      .objective { max-width: 420px; }
+      .objective span { font-size: 11px; letter-spacing: .12em; color: #8fa4ba; text-transform: uppercase; }
+      .speedo { position: absolute; right: 24px; bottom: 140px; text-align: center; }
+      .speedo strong { font-size: 42px; color: #5fd4ff; }
+      .map-ui { position: absolute; inset: 40px; border-radius: 16px; border: 1px solid rgba(95,212,255,.3); background: rgba(10,16,26,.95); padding: 20px; }
+      .map-ui h2 { margin-bottom: 12px; }
+      .map-canvas { width: 100%; height: calc(100% - 48px); background: #0a121c; border-radius: 10px; }
+      .hidden { display: none !important; }
+    </style>
+  </head>
+  <body>
+    <div id="canvas-wrap"><canvas id="c"></canvas></div>
+    <div id="hud" class="hud-mock hidden">
+      <div class="hud-top">
+        <div class="panel minimap"></div>
+        <div class="panel">127° <strong style="font-size:28px;margin-left:8px">SE</strong></div>
+        <div class="panel" style="margin-left:auto">62 FPS</div>
+      </div>
+      <div class="panel objective">
+        <span>Objective</span>
+        <p style="margin-top:6px">Courier Run: Drive to Glass Spire Plaza (84 m)</p>
+      </div>
+      <div class="speedo panel"><strong>74</strong><div style="font-size:12px;letter-spacing:.1em">KM/H</div></div>
+    </div>
+    <div id="mapui" class="map-ui hidden">
+      <h2>District Map — Harbor Row</h2>
+      <canvas id="map2d" class="map-canvas"></canvas>
+    </div>
+    <script type="module">
+      import * as THREE from 'https://cdn.jsdelivr.net/npm/three@0.160.0/build/three.module.js'
+      const shot = Number(new URLSearchParams(location.search).get('shot') || '1')
+      const canvas = document.getElementById('c')
+      const renderer = new THREE.WebGLRenderer({ canvas, antialias: true })
+      renderer.setSize(1920, 1080, false)
+      renderer.shadowMap.enabled = true
+      const scene = new THREE.Scene()
+      scene.background = new THREE.Color('#7eb3e8')
+      scene.fog = new THREE.Fog('#9eb9d0', 50, 210)
+      const camera = new THREE.PerspectiveCamera(60, 16 / 9, 0.1, 500)
+      const sun = new THREE.DirectionalLight('#fff0cc', 1.45)
+      sun.position.set(70, 100, 50)
+      sun.castShadow = true
+      scene.add(sun, new THREE.HemisphereLight('#e8f2ff', '#5a6d52', 0.55))
+      const ground = new THREE.Mesh(new THREE.PlaneGeometry(420, 420), new THREE.MeshStandardMaterial({ color: '#2a2d33', roughness: 0.95 }))
+      ground.rotation.x = -Math.PI / 2
+      ground.receiveShadow = true
+      scene.add(ground)
+      const mat = new THREE.MeshStandardMaterial({ color: '#5a6472', roughness: 0.82 })
+      const water = new THREE.Mesh(new THREE.PlaneGeometry(420, 80), new THREE.MeshStandardMaterial({ color: '#2a5f7a', metalness: 0.35, roughness: 0.2 }))
+      water.rotation.x = -Math.PI / 2
+      water.position.set(0, 0.02, -150)
+      scene.add(water)
+      for (let gx = -3; gx <= 3; gx++) {
+        for (let gz = -2; gz <= 4; gz++) {
+          const h = 8 + Math.random() * (gz > 2 ? 24 : 10)
+          const b = new THREE.Mesh(new THREE.BoxGeometry(28, h, 24), mat)
+          b.position.set(gx * 38, h / 2, gz * 34)
+          b.castShadow = true
+          scene.add(b)
+        }
+      }
+      const car = new THREE.Group()
+      const body = new THREE.Mesh(new THREE.BoxGeometry(1.85, 0.55, 4.1), new THREE.MeshStandardMaterial({ color: '#c43c3c', metalness: 0.45, roughness: 0.35 }))
+      body.position.y = 0.45
+      body.castShadow = true
+      car.add(body)
+      car.position.set(2, 0, 6)
+      scene.add(car)
+      const player = new THREE.Mesh(new THREE.CapsuleGeometry(0.32, 0.75, 6, 10), new THREE.MeshStandardMaterial({ color: '#2f6f9f' }))
+      player.position.set(-8, 1.05, 10)
+      scene.add(player)
+      const configs = {
+        2: { pos: [48, 32, 58], look: [0, 6, 0], hud: false, map: false },
+        3: { pos: [-14, 4.5, 16], look: [-8, 1.2, 10], hud: false, map: false },
+        4: { pos: [10, 3.8, 14], look: [2, 0.8, 6], hud: false, map: false },
+        5: { pos: [22, 14, 28], look: [2, 1, 6], hud: true, map: false },
+        7: { pos: [0, 120, 8], look: [0, 0, 0], hud: false, map: true },
+      }
+      const cfg = configs[shot] || configs[2]
+      camera.position.set(...cfg.pos)
+      camera.lookAt(...cfg.look)
+      if (cfg.hud) document.getElementById('hud').classList.remove('hidden')
+      if (cfg.map) {
+        document.getElementById('mapui').classList.remove('hidden')
+        const m = document.getElementById('map2d')
+        m.width = 1800; m.height = 900
+        const ctx = m.getContext('2d')
+        ctx.fillStyle = '#0a121c'; ctx.fillRect(0, 0, m.width, m.height)
+        for (let i = 0; i < 40; i++) {
+          ctx.fillStyle = `hsl(${200 + (i % 5) * 8} 25% ${22 + (i % 4) * 6}%)`
+          ctx.fillRect((i % 8) * 220, Math.floor(i / 8) * 180, 180, 140)
+        }
+        ctx.strokeStyle = '#6a7a88'; ctx.lineWidth = 4
+        ctx.beginPath(); ctx.moveTo(900, 0); ctx.lineTo(900, 900); ctx.stroke()
+        ctx.beginPath(); ctx.moveTo(0, 450); ctx.lineTo(1800, 450); ctx.stroke()
+        ctx.fillStyle = '#5fd4ff'
+        ctx.beginPath(); ctx.arc(920, 470, 8, 0, Math.PI * 2); ctx.fill()
+      }
+      renderer.render(scene, camera)
+      window.__ASHLINE_READY__ = true
+    </script>
+  </body>
+</html>
