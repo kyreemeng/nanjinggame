@@ -1,5 +1,4 @@
 import type { MissionSaveSlice } from '../game/missions/MissionManager'
-import { landmarkWorldPosition } from '../map-data/landmarks'
 import { t } from '../i18n'
 import { loadSettings, saveSettings, type GameSettings } from './settings'
 import { useGameStore } from '../game/store/gameStore'
@@ -55,10 +54,10 @@ export function loadSave(): GameSave | null {
 }
 
 export function defaultWorldPose(): WorldPose {
-  const base = landmarkWorldPosition('xinjiekou') ?? { x: 0, y: 0, z: 0 }
+  /** Matches road-snapped spawn on 洪武路 (OSM) near Xinjiekou — see roadSpawn.ts */
   return {
-    player: { x: base.x - 8, y: 16.1, z: base.z + 6 },
-    vehicle: { x: base.x + 12, y: 15.65, z: base.z - 10, yaw: 0 },
+    player: { x: -1653.41, y: 20.88, z: -710.5 },
+    vehicle: { x: -1653.15, y: 20.43, z: -720.66, yaw: 0.1524 },
     mode: 'foot',
   }
 }

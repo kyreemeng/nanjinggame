@@ -19,6 +19,7 @@ export function FullMapOverlay() {
   const playerZ = useGameStore((s) => s.playerZ)
   const compass = useGameStore((s) => s.compassDeg)
   const markers = useGameStore((s) => s.mapMarkers)
+  const anchors = useGameStore((s) => s.mapAnchors)
   const canvasRef = useRef<HTMLCanvasElement>(null)
 
   useEffect(() => {
@@ -60,6 +61,19 @@ export function FullMapOverlay() {
       ctx.stroke()
     }
 
+    for (const m of anchors) {
+      const p = worldToMapPx(m.x, m.z, w)
+      ctx.fillStyle = '#7ec8ff'
+      ctx.beginPath()
+      ctx.arc(p.px, p.py, 5, 0, Math.PI * 2)
+      ctx.fill()
+      if (m.label) {
+        ctx.fillStyle = 'rgba(255,255,255,0.75)'
+        ctx.font = '10px system-ui'
+        ctx.fillText(m.label, p.px + 7, p.py + 3)
+      }
+    }
+
     for (const m of markers) {
       const p = worldToMapPx(m.x, m.z, w)
       ctx.fillStyle = '#ffc857'
@@ -85,7 +99,7 @@ export function FullMapOverlay() {
     ctx.fillStyle = 'rgba(255,255,255,0.5)'
     ctx.font = '11px system-ui'
     ctx.fillText(footer, 12, h - 12)
-  }, [open, playerX, playerZ, compass, markers, t])
+  }, [open, playerX, playerZ, compass, markers, anchors, t])
 
   if (!open) return null
 
@@ -113,6 +127,7 @@ export function FullMapOverlay() {
               {t(`map.zone.${item.zone}` as MessageKey)}
             </span>
           ))}
+          <span><i className="anchor-sample" /> {t('map.anchors')}</span>
           <span><i className="marker-sample" /> {t('map.objective')}</span>
         </div>
       </div>

@@ -25,6 +25,8 @@ export const LANDMARKS: Record<string, { x: number; z: number }> = {
   xinjiekou: lm('xinjiekou'),
   fuzimiao: lm('fuzimiao'),
   'xuanwu-lake': lm('xuanwu-lake'),
+  'ming-wall-zhongshan': lm('ming-wall-zhongshan'),
+  'qinhuai-river': lm('qinhuai-river'),
   laomendong: lm('laomendong'),
 }
 
@@ -51,7 +53,7 @@ export const MISSIONS: MissionDef[] = [
     id: 'landmark-tour',
     kind: 'landmarks',
     reward: 260,
-    landmarkIds: ['xinjiekou', 'fuzimiao', 'xuanwu-lake', 'laomendong'],
+    landmarkIds: ['xuanwu-lake', 'ming-wall-zhongshan', 'fuzimiao', 'qinhuai-river'],
   },
 ]
 

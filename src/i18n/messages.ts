@@ -71,6 +71,9 @@ const en = {
   'landmark.fuzimiao': 'Fuzimiao (Confucius Temple)',
   'landmark.xuanwu-lake': 'Xuanwu Lake shore',
   'landmark.laomendong': 'Laomendong',
+  'landmark.ming-wall-zhongshan': 'Ming city wall (Zhongshan Gate)',
+  'landmark.qinhuai-river': 'Qinhuai River (Fuzimiao)',
+  'map.anchors': 'Landmarks',
 
   'hud.objective': 'Objective',
   'hud.heat': 'HEAT',
@@ -205,6 +208,9 @@ const zh: Record<keyof typeof en, string> = {
   'landmark.fuzimiao': '夫子庙',
   'landmark.xuanwu-lake': '玄武湖岸',
   'landmark.laomendong': '老门东',
+  'landmark.ming-wall-zhongshan': '明城墙（中山门）',
+  'landmark.qinhuai-river': '秦淮河（夫子庙段）',
+  'map.anchors': '地标锚点',
 
   'hud.objective': '目标',
   'hud.heat': '热度',

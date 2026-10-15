@@ -47,7 +47,7 @@ Rebind keys in **Settings**.
 | `src/game/missions/` | Mission manager + definitions |
 | `src/storage/` | Save + settings |
 
-**Legacy:** `CityBuilder.ts` (Harbor Row procedural city) remains for reference; default world uses `NanjingWorldBuilder`.
+**Legacy:** Harbor Row (`CityBuilder.ts`) is off by default; dev-only `?world=harbor` on the game URL.
 
 ## Stack
 

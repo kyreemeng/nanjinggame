@@ -26,6 +26,8 @@ export interface GameStoreState {
   missionToast: string | null
   missionTimerSec: number | null
   mapMarkers: MapMarker[]
+  /** OSM-verified core anchors (always on minimap / full map). */
+  mapAnchors: MapMarker[]
   missionSave: MissionSaveSlice
   newGameSession: boolean
   wantedStars: number
@@ -35,6 +37,7 @@ export interface GameStoreState {
   worldPose: WorldPose
   setPhase: (phase: GamePhase) => void
   setMapOpen: (open: boolean) => void
+  setMapAnchors: (anchors: MapMarker[]) => void
   setBootError: (message: string | null) => void
   setHud: (
     partial: Partial<
@@ -84,6 +87,7 @@ export const useGameStore = create<GameStoreState>((set) => ({
   missionToast: null,
   missionTimerSec: null,
   mapMarkers: [],
+  mapAnchors: [],
   missionSave: defaultMissionSave(),
   newGameSession: true,
   wantedStars: 0,
@@ -95,6 +99,7 @@ export const useGameStore = create<GameStoreState>((set) => ({
   setPhase: (phase) => set({ phase }),
   setWorldPose: (world) => set({ worldPose: world }),
   setMapOpen: (open) => set({ mapOpen: open }),
+  setMapAnchors: (anchors) => set({ mapAnchors: anchors }),
   setBootError: (message) => set({ bootError: message }),
   setHud: (partial) => set(partial),
   setMissionSave: (slice) => set({ missionSave: slice }),
@@ -117,6 +122,7 @@ export const useGameStore = create<GameStoreState>((set) => ({
       missionToast: null,
       missionTimerSec: null,
       mapMarkers: [],
+      mapAnchors: [],
       missionSave: defaultMissionSave(),
       newGameSession: true,
       wantedStars: 0,

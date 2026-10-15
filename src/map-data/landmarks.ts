@@ -29,12 +29,14 @@ export const NANJING_LANDMARKS: LandmarkRecord[] = [
     id: 'xuanwu-lake',
     nameEn: 'Xuanwu Lake shore',
     nameZh: '玄武湖岸',
-    geo: { lat: 32.0752, lon: 118.8124 },
+    /** OSM water centroid (bundle w88806258), north shore verified core */
+    geo: { lat: 32.04559, lon: 118.81369 },
   },
   {
     id: 'ming-wall-zhongshan',
     nameEn: 'Ming city wall (Zhongshan Gate)',
     nameZh: '明城墙（中山门）',
+    /** APPROXIMATE: gate position; shoreline geometry from OSM water adjacency */
     geo: { lat: 32.0458, lon: 118.8142 },
   },
   {
@@ -47,8 +49,13 @@ export const NANJING_LANDMARKS: LandmarkRecord[] = [
     id: 'qinhuai-river',
     nameEn: 'Qinhuai River (Fuzimiao)',
     nameZh: '秦淮河（夫子庙段）',
-    geo: { lat: 32.0201, lon: 118.7935 },
+    /** OSM riverbank centroid near Fuzimiao (bundle w120889873) */
+    geo: { lat: 32.02028, lon: 118.79269 },
   },
+]
+
+/** Phase 3 — not in verified-core playable slice (excluded from default anchors). */
+export const PHASE3_LANDMARKS: LandmarkRecord[] = [
   {
     id: 'zijinshan-lookout',
     nameEn: 'Purple Mountain (distant)',

@@ -7,6 +7,7 @@ export function Minimap() {
   const z = useGameStore((s) => s.playerZ)
   const yaw = useGameStore((s) => s.compassDeg)
   const markers = useGameStore((s) => s.mapMarkers)
+  const anchors = useGameStore((s) => s.mapAnchors)
   const setMapOpen = useGameStore((s) => s.setMapOpen)
 
   const size = 120
@@ -23,6 +24,17 @@ export function Minimap() {
       title="Open district map"
     >
       <div className="minimap-grid" style={{ width: size, height: size }}>
+        {anchors.map((m, i) => (
+          <div
+            key={`anchor-${m.x}-${m.z}-${i}`}
+            className="minimap-anchor"
+            style={{
+              left: ((m.x - bounds.minX) / bounds.width) * size,
+              top: ((m.z - bounds.minZ) / bounds.depth) * size,
+            }}
+            title={m.label}
+          />
+        ))}
         {markers.map((m, i) => {
           const px = ((m.x - bounds.minX) / bounds.width) * size
           const py = ((m.z - bounds.minZ) / bounds.depth) * size

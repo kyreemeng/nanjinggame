@@ -2,7 +2,8 @@ import * as THREE from 'three'
 import { ACTIVE_WORLD_BBOX, worldBoundsFromBbox, worldToGeo } from '../../../map-data/coordinate-system'
 import { sampleTerrainHeight } from '../../../map-data/terrain'
 import type { NanjingMapBundle } from '../../../map-data/types'
-import { defaultSpawnPositions } from '../../../map-data/worldSpawn'
+import { coreAnchorMarkers } from '../../../map-data/landmarkAnchors'
+import { defaultSpawnFromBundle } from '../../../map-data/worldSpawn'
 import type { ColliderBox } from '../../physics/PhysicsWorld'
 import { getAsphaltMaterial, getConcreteMaterial } from '../sharedMaterials'
 import { buildRoadGraphFromOsM, sampleSidewalkAlongRoads } from './osmRoadGraph'
@@ -13,7 +14,10 @@ export interface NanjingWorldResult {
   colliders: ColliderBox[]
   spawnPlayer: THREE.Vector3
   spawnVehicle: THREE.Vector3
+  spawnVehicleYaw: number
   bounds: ReturnType<typeof worldBoundsFromBbox>
+  roadSnapDistance: number
+  mapAnchors: { x: number; z: number; label: string }[]
 }
 
 function heightAt(bundle: NanjingMapBundle, x: number, z: number): number {
@@ -121,10 +125,25 @@ function addBuildings(
     }
     cx /= b.points.length
     cz /= b.points.length
-    colliders.push({
-      center: new THREE.Vector3(cx, baseY + b.height / 2, cz),
-      halfExtents: new THREE.Vector3(4, b.height / 2, 4),
-    })
+    // APPROXIMATE: coarse boxes for tall buildings only — avoids blocking OSM roads.
+    if (b.height >= 18) {
+      colliders.push({
+        center: new THREE.Vector3(cx, baseY + b.height / 2, cz),
+        halfExtents: new THREE.Vector3(3, b.height / 2, 3),
+      })
+    }
+  }
+}
+
+function addAnchorMarkers(parent: THREE.Group, bundle: NanjingMapBundle): void {
+  const markers = coreAnchorMarkers(bundle)
+  const mat = new THREE.MeshStandardMaterial({ color: '#ffc857', emissive: '#5a4020', roughness: 0.4 })
+  for (const m of markers) {
+    const y = heightAt(bundle, m.x, m.z) + 0.5
+    const pole = new THREE.Mesh(new THREE.CylinderGeometry(0.35, 0.45, 8, 8), mat)
+    pole.position.set(m.x, y + 4, m.z)
+    pole.castShadow = true
+    parent.add(pole)
   }
 }
 
@@ -154,10 +173,25 @@ export function buildNanjingWorld(bundle: NanjingMapBundle): NanjingWorldResult 
   addWater(group, bundle)
   // APPROXIMATE: cap building count for Web perf; heights may be estimated per OSM tags.
   addBuildings(group, colliders, bundle, 1200)
+  addAnchorMarkers(group, bundle)
 
-  const spawn = defaultSpawnPositions(bundle.manifest.dem)
+  const spawn = defaultSpawnFromBundle(bundle)
   const spawnPlayer = new THREE.Vector3(spawn.player.x, spawn.player.y, spawn.player.z)
   const spawnVehicle = new THREE.Vector3(spawn.vehicle.x, spawn.vehicle.y, spawn.vehicle.z)
+  const mapAnchors = coreAnchorMarkers(bundle).map((m) => ({
+    x: m.x,
+    z: m.z,
+    label: m.label,
+  }))
 
-  return { group, colliders, spawnPlayer, spawnVehicle, bounds }
+  return {
+    group,
+    colliders,
+    spawnPlayer,
+    spawnVehicle,
+    spawnVehicleYaw: spawn.vehicle.yaw,
+    bounds,
+    roadSnapDistance: spawn.roadSnapDistance,
+    mapAnchors,
+  }
 }

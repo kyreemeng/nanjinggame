@@ -4,8 +4,8 @@ import { Vehicle } from './entities/Vehicle'
 import { FollowCamera } from './camera/FollowCamera'
 import { InputManager } from './input/InputManager'
 import { PhysicsWorld } from './physics/PhysicsWorld'
-import { loadNanjingMapBundle } from '../map-data/loadNanjingMap'
-import { buildNanjingWorld } from './world/nanjing/NanjingWorldBuilder'
+import { loadPlayableWorld } from './world/loadPlayableWorld'
+import { resolveWorldMode } from './world/worldMode'
 import { createAtmosphere, updateSunShadowFocus, type AtmosphereHandles } from './world/atmosphere'
 import { DayNightCycle } from './world/dayNight'
 import { useGameStore } from './store/gameStore'
@@ -79,21 +79,24 @@ export class GameEngine {
     this.physics = new PhysicsWorld()
     await this.physics.init()
 
-    const bundle = await loadNanjingMapBundle()
-    const city = buildNanjingWorld(bundle)
-    this.physics.addGroundExtent(
-      city.bounds.centerX,
-      city.bounds.centerZ,
-      city.bounds.width + 48,
-      city.bounds.depth + 48,
-    )
+    const worldMode = resolveWorldMode()
+    const city = await loadPlayableWorld(worldMode)
+    this.physics.addGroundExtent(city.ground.centerX, city.ground.centerZ, city.ground.width, city.ground.depth)
     this.scene.add(city.group)
     for (const box of city.colliders) {
       this.physics.addStaticBox(box)
     }
 
+    useGameStore.getState().setMapAnchors(city.mapAnchors)
+
     this.player = new Player(this.physics, city.spawnPlayer)
     this.vehicle = new Vehicle(this.physics, city.spawnVehicle)
+    this.vehicle.setWorldPose(
+      city.spawnVehicle.x,
+      city.spawnVehicle.y,
+      city.spawnVehicle.z,
+      city.spawnVehicleYaw,
+    )
     this.scene.add(this.player.mesh, this.vehicle.mesh)
 
     this.traffic = new TrafficSystem(this.scene)
@@ -186,9 +189,17 @@ export class GameEngine {
   }
 
   private applyWorldFromStore(isNewGame: boolean): void {
-    const pose: WorldPose =
-      isNewGame ? defaultWorldPose() : useGameStore.getState().worldPose ?? defaultWorldPose()
-    const disk = !isNewGame ? loadSave() : null
+    if (isNewGame) {
+      this.mode = 'foot'
+      this.player.setVisible(true)
+      this.player.collider.setEnabled(true)
+      useGameStore.getState().setHud({ driving: false })
+      useGameStore.getState().setWorldPose(this.captureWorldPose())
+      return
+    }
+
+    const pose: WorldPose = useGameStore.getState().worldPose ?? defaultWorldPose()
+    const disk = loadSave()
     const world = disk?.world ?? pose
 
     this.player.setPosition(new THREE.Vector3(world.player.x, world.player.y, world.player.z))

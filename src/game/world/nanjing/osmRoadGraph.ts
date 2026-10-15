@@ -1,8 +1,10 @@
 import * as THREE from 'three'
+import { isDrivableHighway } from '../../../map-data/drivableRoads'
 import type { RoadPolyline } from '../../../map-data/types'
 import type { RoadEdge, RoadGraph, RoadNode } from '../roadGraphTypes'
 
-const SNAP_M = 5.5
+/** Slightly loose snap so tile seams still connect in the drivable graph. */
+const SNAP_M = 8
 
 function dist2d(a: { x: number; z: number }, b: { x: number; z: number }): number {
   return Math.hypot(a.x - b.x, a.z - b.z)
@@ -23,6 +25,7 @@ export function buildRoadGraphFromOsM(roads: RoadPolyline[]): RoadGraph {
   let eid = 0
 
   for (const road of roads) {
+    if (!isDrivableHighway(road.highway)) continue
     for (let i = 0; i < road.points.length - 1; i++) {
       const a = road.points[i]
       const b = road.points[i + 1]

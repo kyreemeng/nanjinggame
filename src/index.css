@@ -179,6 +179,20 @@ body,
   box-shadow: 0 0 6px rgba(255, 200, 87, 0.9);
 }
 
+.minimap-anchor {
+  position: absolute;
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  background: #7ec8ff;
+  transform: translate(-50%, -50%);
+  box-shadow: 0 0 6px rgba(126, 200, 255, 0.9);
+}
+
+.map-legend .anchor-sample {
+  background: #7ec8ff;
+}
+
 .mission-toast {
   position: absolute;
   top: 1rem;
