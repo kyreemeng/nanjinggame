@@ -31,6 +31,7 @@ export class FollowCamera {
     driving: boolean,
     dt: number,
     targetYaw?: number,
+    minCameraY?: number,
   ): void {
     if (driving && targetYaw !== undefined) {
       this.yaw = THREE.MathUtils.lerp(this.yaw, targetYaw + Math.PI, 1 - Math.exp(-4 * dt))
@@ -45,7 +46,13 @@ export class FollowCamera {
       Math.cos(this.yaw) * dist,
     )
     const desired = targetPos.clone().add(offset)
+    if (minCameraY !== undefined) {
+      desired.y = Math.max(desired.y, minCameraY)
+    }
     this.camera.position.lerp(desired, 1 - Math.exp(-10 * dt))
+    if (minCameraY !== undefined && this.camera.position.y < minCameraY) {
+      this.camera.position.y = minCameraY
+    }
     const lookAt = targetPos.clone().add(new THREE.Vector3(0, driving ? 0.8 : 1.4, 0))
     this.camera.lookAt(lookAt)
   }

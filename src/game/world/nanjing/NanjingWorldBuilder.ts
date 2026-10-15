@@ -8,6 +8,7 @@ import type { ColliderBox } from '../../physics/PhysicsWorld'
 import { getAsphaltMaterial, getConcreteMaterial } from '../sharedMaterials'
 import { addLandmarkLodMeshes } from './landmarkLod'
 import { buildRoadGraphFromOsM, sampleSidewalkAlongRoads } from './osmRoadGraph'
+import { buildTerrainHeightfield, type TerrainHeightfieldData } from './terrainHeightfield'
 import { setActiveRoadGraph, setSidewalkLoops } from '../roadGraph'
 
 export interface NanjingWorldResult {
@@ -19,6 +20,7 @@ export interface NanjingWorldResult {
   bounds: ReturnType<typeof worldBoundsFromBbox>
   roadSnapDistance: number
   mapAnchors: { x: number; z: number; label: string }[]
+  terrainHeightfield: TerrainHeightfieldData
 }
 
 function heightAt(bundle: NanjingMapBundle, x: number, z: number): number {
@@ -29,7 +31,7 @@ function heightAt(bundle: NanjingMapBundle, x: number, z: number): number {
 function buildTerrainMesh(bundle: NanjingMapBundle, bounds: NanjingWorldResult['bounds']): THREE.Mesh {
   const seg = Math.min(128, Math.max(72, Math.round(Math.max(bounds.width, bounds.depth) / 55)))
   const geo = new THREE.PlaneGeometry(bounds.width + 80, bounds.depth + 80, seg, seg)
-  geo.rotateX(-Math.PI / 2)
+  geo.rotateX(Math.PI / 2)
   const pos = geo.attributes.position
   for (let i = 0; i < pos.count; i++) {
     const lx = pos.getX(i)
@@ -39,7 +41,11 @@ function buildTerrainMesh(bundle: NanjingMapBundle, bounds: NanjingWorldResult['
     pos.setY(i, heightAt(bundle, wx, wz))
   }
   geo.computeVertexNormals()
-  const mat = new THREE.MeshStandardMaterial({ color: '#3d4a38', roughness: 0.95 })
+  const mat = new THREE.MeshStandardMaterial({
+    color: '#3d4a38',
+    roughness: 0.95,
+    side: THREE.DoubleSide,
+  })
   const mesh = new THREE.Mesh(geo, mat)
   mesh.position.set(bounds.centerX, 0, bounds.centerZ)
   mesh.receiveShadow = true
@@ -154,6 +160,7 @@ function addAnchorMarkers(parent: THREE.Group, bundle: NanjingMapBundle): void {
  */
 export function buildNanjingWorld(bundle: NanjingMapBundle): NanjingWorldResult {
   const bounds = worldBoundsFromBbox(ACTIVE_WORLD_BBOX)
+  const terrainHeightfield = buildTerrainHeightfield(bundle, bounds)
   const group = new THREE.Group()
   const colliders: ColliderBox[] = []
 
@@ -195,5 +202,6 @@ export function buildNanjingWorld(bundle: NanjingMapBundle): NanjingWorldResult 
     bounds,
     roadSnapDistance: spawn.roadSnapDistance,
     mapAnchors,
+    terrainHeightfield,
   }
 }

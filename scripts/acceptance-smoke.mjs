@@ -2,6 +2,7 @@
  * Node smoke checks (no WebGL). Run: node scripts/acceptance-smoke.mjs
  */
 import { readFileSync } from 'node:fs'
+import { spawnSync } from 'node:child_process'
 
 const pkg = JSON.parse(readFileSync('package.json', 'utf8'))
 const requiredScripts = ['dev', 'build']
@@ -86,6 +87,14 @@ if (!messages.includes("'landmark.zhongshan-ling'")) {
   throw new Error('missing i18n for zhongshan-ling anchor')
 }
 
+const spawnCheck = spawnSync(process.execPath, ['scripts/spawn-ground-check.mjs'], {
+  cwd: process.cwd(),
+  encoding: 'utf8',
+})
+if (spawnCheck.status !== 0) {
+  throw new Error(`spawn Y check failed:\n${spawnCheck.stderr}\n${spawnCheck.stdout}`)
+}
+
 console.log(
-  `acceptance-smoke: ok (missions + i18n + drivable graph ${(ratio * 100).toFixed(1)}% connected)`,
+  `acceptance-smoke: ok (missions + i18n + drivable graph ${(ratio * 100).toFixed(1)}% connected, spawn on terrain)`,
 )

@@ -54,10 +54,10 @@ export function loadSave(): GameSave | null {
 }
 
 export function defaultWorldPose(): WorldPose {
-  /** Matches road-snapped spawn on 洪武路 (OSM) near Xinjiekou — see roadSpawn.ts */
+  /** Fallback pose; new games use road-snapped spawn from GameEngine (roadSpawn.ts). */
   return {
-    player: { x: -1653.41, y: 20.88, z: -710.5 },
-    vehicle: { x: -1653.15, y: 20.43, z: -720.66, yaw: 0.1524 },
+    player: { x: -1653.41, y: 21.5, z: -710.5 },
+    vehicle: { x: -1653.15, y: 21.0, z: -720.66, yaw: 0.1524 },
     mode: 'foot',
   }
 }

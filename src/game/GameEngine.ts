@@ -20,6 +20,15 @@ import { MissionManager } from './missions/MissionManager'
 import { applyGraphicsPreset } from './graphics/applyGraphicsPreset'
 import { getAudioManager } from './audio/AudioManager'
 import { t } from '../i18n'
+import {
+  CAMERA_MIN_ABOVE_GROUND,
+  clampBodyAboveGround,
+  groundSurfaceY,
+  PLAYER_BODY_CLEARANCE,
+  VEHICLE_BODY_CLEARANCE,
+} from '../map-data/groundHeight'
+import { getCachedNanjingMap } from '../map-data/loadNanjingMap'
+import type { DemGridMeta } from '../map-data/types'
 
 export type ControlMode = 'foot' | 'vehicle'
 
@@ -54,6 +63,7 @@ export class GameEngine {
   private missionSaveTimer = 0
   private worldPoseTimer = 0
   private settingsRevision = 0
+  private terrainDem: DemGridMeta | null = null
 
   private canvas: HTMLCanvasElement
 
@@ -81,7 +91,14 @@ export class GameEngine {
 
     const worldMode = resolveWorldMode()
     const city = await loadPlayableWorld(worldMode)
-    this.physics.addGroundExtent(city.ground.centerX, city.ground.centerZ, city.ground.width, city.ground.depth)
+    if (city.terrainHeightfield) {
+      this.physics.addTerrainHeightfield(city.terrainHeightfield)
+      const bundle = getCachedNanjingMap()
+      this.terrainDem = bundle?.manifest.dem ?? null
+    } else {
+      this.physics.addGroundExtent(city.ground.centerX, city.ground.centerZ, city.ground.width, city.ground.depth)
+      this.terrainDem = null
+    }
     this.scene.add(city.group)
     for (const box of city.colliders) {
       this.physics.addStaticBox(box)
@@ -200,7 +217,32 @@ export class GameEngine {
 
     const pose: WorldPose = useGameStore.getState().worldPose ?? defaultWorldPose()
     const disk = loadSave()
-    const world = disk?.world ?? pose
+    let world = disk?.world ?? pose
+    if (this.terrainDem) {
+      world = {
+        ...world,
+        player: {
+          ...world.player,
+          y: clampBodyAboveGround(
+            this.terrainDem,
+            world.player.x,
+            world.player.y,
+            world.player.z,
+            PLAYER_BODY_CLEARANCE,
+          ),
+        },
+        vehicle: {
+          ...world.vehicle,
+          y: clampBodyAboveGround(
+            this.terrainDem,
+            world.vehicle.x,
+            world.vehicle.y,
+            world.vehicle.z,
+            VEHICLE_BODY_CLEARANCE,
+          ),
+        },
+      }
+    }
 
     this.player.setPosition(new THREE.Vector3(world.player.x, world.player.y, world.player.z))
     this.vehicle.setWorldPose(world.vehicle.x, world.vehicle.y, world.vehicle.z, world.vehicle.yaw)
@@ -273,7 +315,17 @@ export class GameEngine {
         this.mode === 'foot'
           ? this.player.position.clone().add(new THREE.Vector3(0, 0.2, 0))
           : this.vehicle.position.clone().add(new THREE.Vector3(0, 0.5, 0))
-      this.followCam.update(target, this.mode === 'vehicle', dt, this.vehicle.yaw)
+      const minCameraY =
+        this.terrainDem !== null
+          ? groundSurfaceY(this.terrainDem, target.x, target.z) + CAMERA_MIN_ABOVE_GROUND
+          : undefined
+      this.followCam.update(
+        target,
+        this.mode === 'vehicle',
+        dt,
+        this.mode === 'vehicle' ? this.vehicle.yaw : undefined,
+        minCameraY,
+      )
 
       const playerPos = this.mode === 'foot' ? this.player.position : this.vehicle.position
       if (!mapOpen) {

@@ -1,7 +1,10 @@
-import { geoToWorld, worldToGeo } from './coordinate-system'
+import { geoToWorld } from './coordinate-system'
 import { nearestDrivableRoadPoint } from './drivableRoads'
+import {
+  playerBodyYOnGround,
+  vehicleBodyYOnGround,
+} from './groundHeight'
 import { landmarkWorldPosition } from './landmarks'
-import { sampleTerrainHeight } from './terrain'
 import type { DemGridMeta, NanjingMapBundle, RoadPolyline } from './types'
 
 export interface SpawnPositions {
@@ -10,11 +13,6 @@ export interface SpawnPositions {
   /** meters from requested anchor to snapped road */
   roadSnapDistance: number
   roadName?: string
-}
-
-function terrainY(dem: DemGridMeta, x: number, z: number, offset: number): number {
-  const { lat, lon } = worldToGeo(x, z)
-  return sampleTerrainHeight(dem, lat, lon) + offset
 }
 
 function spawnFromRoadSample(
@@ -32,12 +30,12 @@ function spawnFromRoadSample(
   return {
     player: {
       x: playerX,
-      y: terrainY(dem, playerX, playerZ, 1.1),
+      y: playerBodyYOnGround(dem, playerX, playerZ),
       z: playerZ,
     },
     vehicle: {
       x: vehicleX,
-      y: terrainY(dem, vehicleX, vehicleZ, 0.65),
+      y: vehicleBodyYOnGround(dem, vehicleX, vehicleZ),
       z: vehicleZ,
       yaw,
     },
@@ -60,10 +58,10 @@ export function computeSpawnOnRoad(
   }
 
   return {
-    player: { x: anchor.x, y: terrainY(dem, anchor.x, anchor.z, 1.1), z: anchor.z },
+    player: { x: anchor.x, y: playerBodyYOnGround(dem, anchor.x, anchor.z), z: anchor.z },
     vehicle: {
       x: anchor.x + 12,
-      y: terrainY(dem, anchor.x + 12, anchor.z, 0.65),
+      y: vehicleBodyYOnGround(dem, anchor.x + 12, anchor.z - 10),
       z: anchor.z - 10,
       yaw: 0,
     },

@@ -47,6 +47,24 @@ export class PhysicsWorld {
     this.staticBodies.push(body)
   }
 
+  addTerrainHeightfield(params: {
+    nrows: number
+    ncols: number
+    heights: Float32Array
+    sizeX: number
+    sizeZ: number
+    centerX: number
+    centerZ: number
+  }): void {
+    const { nrows, ncols, heights, sizeX, sizeZ, centerX, centerZ } = params
+    const body = this.world.createRigidBody(RAPIER.RigidBodyDesc.fixed())
+    const scale = { x: sizeX / ncols, y: 1, z: sizeZ / nrows }
+    const desc = RAPIER.ColliderDesc.heightfield(nrows, ncols, heights, scale)
+    desc.setTranslation(centerX - sizeX / 2, 0, centerZ - sizeZ / 2)
+    this.world.createCollider(desc, body)
+    this.staticBodies.push(body)
+  }
+
   createDynamicBox(
     size: THREE.Vector3,
     position: THREE.Vector3,

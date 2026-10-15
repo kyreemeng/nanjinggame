@@ -3,7 +3,8 @@ import { loadNanjingMapBundle } from '../../map-data/loadNanjingMap'
 import type { ColliderBox } from '../physics/PhysicsWorld'
 import { WORLD_SIZE } from '../constants'
 import { buildCity } from './CityBuilder'
-import { buildNanjingWorld, type NanjingWorldResult } from './nanjing/NanjingWorldBuilder'
+import { buildNanjingWorld } from './nanjing/NanjingWorldBuilder'
+import type { TerrainHeightfieldData } from './nanjing/terrainHeightfield'
 import type { WorldMode } from './worldMode'
 
 export interface PlayableWorldLoadResult {
@@ -15,6 +16,7 @@ export interface PlayableWorldLoadResult {
   ground: { centerX: number; centerZ: number; width: number; depth: number }
   mapAnchors: { x: number; z: number; label: string }[]
   mode: WorldMode
+  terrainHeightfield?: TerrainHeightfieldData
 }
 
 export async function loadPlayableWorld(mode: WorldMode): Promise<PlayableWorldLoadResult> {
@@ -33,7 +35,7 @@ export async function loadPlayableWorld(mode: WorldMode): Promise<PlayableWorldL
   }
 
   const bundle = await loadNanjingMapBundle()
-  const city: NanjingWorldResult = buildNanjingWorld(bundle)
+  const city = buildNanjingWorld(bundle)
   return {
     group: city.group,
     colliders: city.colliders,
@@ -48,5 +50,6 @@ export async function loadPlayableWorld(mode: WorldMode): Promise<PlayableWorldL
     },
     mapAnchors: city.mapAnchors,
     mode: 'nanjing',
+    terrainHeightfield: city.terrainHeightfield,
   }
 }
