@@ -1,8 +1,10 @@
 import { useEffect, useState } from 'react'
-import { DISTRICT_NAME, GAME_TITLE } from '../../game/constants'
+import { GAME_TITLE } from '../../game/constants'
 import { useGameStore } from '../../game/store/gameStore'
+import { useTranslation } from '../../i18n'
 import { applySaveToStore, clearSave, hasSave, loadSave } from '../../storage/saveGame'
 import { ControlsHelpScreen } from './ControlsHelpScreen'
+import { LanguagePicker } from './LanguagePicker'
 import { MissionListScreen } from './MissionListScreen'
 import { playMenuClick } from './playClick'
 import { SettingsScreen } from './SettingsScreen'
@@ -14,6 +16,7 @@ interface MainMenuProps {
 }
 
 export function MainMenu({ onStartSession }: MainMenuProps) {
+  const { t } = useTranslation()
   const setPhase = useGameStore((s) => s.setPhase)
   const resetRun = useGameStore((s) => s.resetRun)
   const setNewGameSession = useGameStore((s) => s.setNewGameSession)
@@ -23,7 +26,6 @@ export function MainMenu({ onStartSession }: MainMenuProps) {
   useEffect(() => {
     setCanContinue(hasSave())
   }, [])
-
 
   if (sub === 'missions')
     return <MissionListScreen preferDiskSave onBack={() => setSub(null)} />
@@ -57,14 +59,15 @@ export function MainMenu({ onStartSession }: MainMenuProps) {
   return (
     <div className="menu-overlay menu-main">
       <div className="menu-hero">
-        <p className="menu-eyebrow">Open district action</p>
+        <p className="menu-eyebrow">{t('brand.eyebrow')}</p>
         <h1>{GAME_TITLE}</h1>
-        <p className="menu-sub">{DISTRICT_NAME}</p>
+        <p className="menu-sub">{t('brand.district')}</p>
       </div>
       <div className="menu-card menu-card-tech menu-actions">
+        <LanguagePicker compact />
         {canContinue && (
           <button type="button" className="menu-btn primary" onClick={continueGame}>
-            Continue
+            {t('menu.continue')}
           </button>
         )}
         <button
@@ -72,16 +75,16 @@ export function MainMenu({ onStartSession }: MainMenuProps) {
           className={canContinue ? 'menu-btn' : 'menu-btn primary'}
           onClick={startNew}
         >
-          {canContinue ? 'New Game' : 'Start Game'}
+          {canContinue ? t('menu.newGame') : t('menu.startGame')}
         </button>
         <button type="button" className="menu-btn" onClick={() => nav('missions')}>
-          Contracts
+          {t('menu.contracts')}
         </button>
         <button type="button" className="menu-btn" onClick={() => nav('settings')}>
-          Settings
+          {t('menu.settings')}
         </button>
         <button type="button" className="menu-btn" onClick={() => nav('controls')}>
-          Controls
+          {t('menu.controls')}
         </button>
       </div>
     </div>

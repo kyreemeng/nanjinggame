@@ -1,4 +1,5 @@
 import type { MissionSaveSlice } from '../game/missions/MissionManager'
+import { t } from '../i18n'
 import { loadSettings, saveSettings, type GameSettings } from './settings'
 import { useGameStore } from '../game/store/gameStore'
 import { useSettingsStore } from '../game/store/settingsStore'
@@ -77,6 +78,7 @@ export function saveGame(): void {
       invertY: settings.invertY,
       graphics: settings.graphics,
       bindings: settings.bindings,
+      locale: settings.locale,
     },
     world,
     savedAt: Date.now(),
@@ -84,7 +86,7 @@ export function saveGame(): void {
   saveSettings(payload.settings)
   localStorage.setItem(SAVE_KEY, JSON.stringify(payload))
   localStorage.removeItem(LEGACY_KEY)
-  state.setHud({ missionToast: 'Progress saved.' })
+  state.setHud({ missionToast: t('save.progressSaved') })
 }
 
 export function applySaveToStore(save: GameSave): void {

@@ -7,6 +7,7 @@ import puppeteer from 'puppeteer'
 
 const BASE = 'http://127.0.0.1:4317'
 const SAVE_KEY = 'ashline-save-v2'
+const SETTINGS_KEY = 'ashline-settings-v2'
 
 function wait(ms) {
   return new Promise((r) => setTimeout(r, ms))
@@ -20,6 +21,13 @@ async function clickButton(page, text) {
     btn?.click()
     return !!btn
   }, text)
+}
+
+async function clickOneOf(page, labels) {
+  for (const label of labels) {
+    if (await clickButton(page, label)) return label
+  }
+  return null
 }
 
 async function waitForHttp(url, maxMs = 60000) {
@@ -50,14 +58,38 @@ function assert(cond, msg) {
   if (!cond) throw new Error(msg)
 }
 
-async function bootGame(page) {
+async function testLanguageSwitch(page) {
   await page.goto(BASE, { waitUntil: 'networkidle0', timeout: 90000 })
-  const bootErr = await page.evaluate(() =>
-    document.body.innerText.includes('Could not start 3D world'),
-  )
+  const bootErr = await page.evaluate(() => {
+    const t = document.body.innerText
+    return t.includes('Could not start 3D world') || t.includes('无法启动 3D 世界')
+  })
   assert(!bootErr, 'boot error UI visible on cold load')
+
+  assert(await clickButton(page, '中文'), 'zh language button missing')
+  await wait(200)
+  let startZh = await page.evaluate(() =>
+    [...document.querySelectorAll('button')].some((b) => b.textContent?.includes('开始游戏')),
+  )
+  assert(startZh, 'main menu not in Chinese after switch')
+
+  const localeZh = await page.evaluate((key) => {
+    const raw = localStorage.getItem(key)
+    return raw ? JSON.parse(raw).locale : null
+  }, SETTINGS_KEY)
+  assert(localeZh === 'zh', `expected locale zh in settings, got ${localeZh}`)
+
+  assert(await clickButton(page, 'English'), 'en language button missing')
+  await wait(200)
+  const startEn = await page.evaluate(() =>
+    [...document.querySelectorAll('button')].some((b) => b.textContent?.includes('Start Game')),
+  )
+  assert(startEn, 'main menu not in English after switch back')
+}
+
+async function bootGame(page) {
   const label = await page.evaluate(() => {
-    const labels = ['Start Game', 'New Game']
+    const labels = ['Start Game', 'New Game', '开始游戏', '新游戏']
     return labels.find((l) =>
       [...document.querySelectorAll('button')].some((b) => b.textContent?.includes(l)),
     )
@@ -91,9 +123,12 @@ async function main() {
   })
 
   const page = await browser.newPage()
-  const results = { fpsSamples: [] }
+  const results = {}
 
   try {
+    await testLanguageSwitch(page)
+    results.i18n = 'ok'
+
     await bootGame(page)
 
     await page.mouse.click(640, 360)
@@ -121,10 +156,13 @@ async function main() {
 
     await page.keyboard.press('Escape')
     await wait(500)
-    const paused = await page.evaluate(() => document.body.innerText.includes('Paused'))
+    const paused = await page.evaluate(() => {
+      const t = document.body.innerText
+      return t.includes('Paused') || t.includes('已暂停')
+    })
     assert(paused, 'pause menu did not open')
 
-    await clickButton(page, 'Save Game')
+    assert(await clickOneOf(page, ['Save Game', '保存游戏']), 'save button missing')
     await wait(400)
 
     const savePayload = await page.evaluate((key) => {
@@ -138,10 +176,10 @@ async function main() {
 
     await page.keyboard.press('Escape')
     await wait(200)
-    await clickButton(page, 'Main Menu')
+    assert(await clickOneOf(page, ['Main Menu', '主菜单']), 'main menu button missing')
     await wait(600)
 
-    await clickButton(page, 'Continue')
+    assert(await clickOneOf(page, ['Continue', '继续游戏']), 'continue button missing')
     await wait(3500)
 
     const continued = await page.evaluate(
@@ -162,10 +200,10 @@ async function main() {
 
     await page.keyboard.press('Escape')
     await wait(300)
-    await clickButton(page, 'Main Menu')
+    await clickOneOf(page, ['Main Menu', '主菜单'])
     await wait(400)
 
-    await clickButton(page, 'New Game')
+    assert(await clickOneOf(page, ['New Game', '新游戏', 'Start Game', '开始游戏']), 'new game missing')
     await wait(3000)
     const fresh = await page.evaluate((key) => {
       const raw = localStorage.getItem(key)
@@ -175,14 +213,14 @@ async function main() {
 
     await page.keyboard.press('KeyM')
     await wait(400)
-    const mapOpen = await page.evaluate(() => document.body.innerText.includes('District Map'))
+    const mapOpen = await page.evaluate(() => !!document.querySelector('.map-overlay'))
     assert(mapOpen, 'map overlay did not open')
     await page.keyboard.press('KeyM')
     await wait(200)
 
     const fps = await page.evaluate(() => {
-      const t = document.querySelector('.fps')
-      const m = t?.textContent?.match(/(\d+)\s*FPS/)
+      const el = document.querySelector('.fps')
+      const m = el?.textContent?.match(/(\d+)/)
       return m ? parseInt(m[1], 10) : 0
     })
     results.fpsSwiftShader = fps

@@ -405,6 +405,40 @@ body,
   color: #7a9ab8;
 }
 
+.language-row {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 0.5rem 0.75rem;
+  margin-bottom: 0.75rem;
+  padding-bottom: 0.75rem;
+  border-bottom: 1px solid rgba(95, 212, 255, 0.12);
+}
+
+.language-row.compact {
+  margin-bottom: 0.5rem;
+  padding-bottom: 0.5rem;
+}
+
+.language-label {
+  font-size: 0.72rem;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: #7a9ab8;
+  flex: 1 1 100%;
+}
+
+.language-buttons {
+  display: flex;
+  gap: 0.5rem;
+  width: 100%;
+}
+
+.language-buttons .menu-btn {
+  flex: 1;
+  margin: 0;
+}
+
 .graphics-row {
   display: grid;
   grid-template-columns: repeat(3, 1fr);

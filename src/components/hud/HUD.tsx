@@ -1,11 +1,13 @@
 import { useSettingsStore } from '../../game/store/settingsStore'
 import { useGameStore } from '../../game/store/gameStore'
 import { formatKeyCode } from '../../game/input/actions'
+import { useTranslation } from '../../i18n'
 import { Minimap } from './Minimap'
 import { MissionToast } from './MissionToast'
 import { Speedometer } from './Speedometer'
 
 export function HUD() {
+  const { t } = useTranslation()
   const health = useGameStore((s) => s.health)
   const money = useGameStore((s) => s.money)
   const objective = useGameStore((s) => s.objective)
@@ -21,20 +23,20 @@ export function HUD() {
 
   const heading =
     compass < 22.5 || compass >= 337.5
-      ? 'N'
+      ? t('compass.N')
       : compass < 67.5
-        ? 'NE'
+        ? t('compass.NE')
         : compass < 112.5
-          ? 'E'
+          ? t('compass.E')
           : compass < 157.5
-            ? 'SE'
+            ? t('compass.SE')
             : compass < 202.5
-              ? 'S'
+              ? t('compass.S')
               : compass < 247.5
-                ? 'SW'
+                ? t('compass.SW')
                 : compass < 292.5
-                  ? 'W'
-                  : 'NW'
+                  ? t('compass.W')
+                  : t('compass.NW')
 
   return (
     <div className="hud hud-tech">
@@ -47,11 +49,11 @@ export function HUD() {
         </div>
         {timer !== null && <div className="mission-timer">{timer}s</div>}
         <div className="wanted" aria-label={`Heat level ${wanted}`}>
-          <span className="wanted-label">HEAT</span>
+          <span className="wanted-label">{t('hud.heat')}</span>
           {'★'.repeat(wanted)}
           <span className="wanted-dim">{'★'.repeat(5 - wanted)}</span>
         </div>
-        <div className="fps">{fps} FPS</div>
+        <div className="fps">{fps} {t('hud.fps')}</div>
       </div>
 
       <div className="hud-right">
@@ -61,27 +63,27 @@ export function HUD() {
       <div className="hud-bottom panel-tech">
         <div className="hud-stats-row">
           <div className="stat-chip">
-            <span className="chip-label">HP</span>
+            <span className="chip-label">{t('hud.hp')}</span>
             <div className="bar">
               <div className="bar-fill health" style={{ width: `${health}%` }} />
             </div>
             <span>{health}</span>
           </div>
           <div className="stat-chip money-chip">
-            <span className="chip-label">CR</span>
+            <span className="chip-label">{t('hud.money')}</span>
             <strong>${money}</strong>
           </div>
         </div>
         <div className="objective">
-          <span>Objective</span>
+          <span>{t('hud.objective')}</span>
           <p>{objective}</p>
         </div>
         {driving ? null : canEnter ? (
-          <div className="prompt">Press E to enter vehicle</div>
+          <div className="prompt">{t('hud.enterVehicle')}</div>
         ) : npcPrompt ? (
-          <div className="prompt">{npcPrompt} — Press E to chat</div>
+          <div className="prompt">{npcPrompt} {t('hud.chatPrompt')}</div>
         ) : (
-          <div className="prompt subtle">{mapKey} district map</div>
+          <div className="prompt subtle">{t('hud.mapPrompt', { key: mapKey })}</div>
         )}
       </div>
     </div>

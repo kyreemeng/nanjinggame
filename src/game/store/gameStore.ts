@@ -1,5 +1,6 @@
 import { create } from 'zustand'
 import type { MissionSaveSlice } from '../missions/MissionManager'
+import { missionTitle } from '../../i18n'
 import { defaultMissionSave, defaultWorldPose, type WorldPose } from '../../storage/saveGame'
 
 export type GamePhase = 'menu' | 'playing' | 'paused'
@@ -73,7 +74,6 @@ export const useGameStore = create<GameStoreState>((set) => ({
   phase: 'menu',
   health: 100,
   money: 320,
-  objective: 'Contract: First Steps',
   speedKmh: 0,
   fps: 0,
   compassDeg: 0,
@@ -91,6 +91,7 @@ export const useGameStore = create<GameStoreState>((set) => ({
   mapOpen: false,
   bootError: null,
   worldPose: defaultWorldPose(),
+  objective: missionTitle('tutorial'),
   setPhase: (phase) => set({ phase }),
   setWorldPose: (world) => set({ worldPose: world }),
   setMapOpen: (open) => set({ mapOpen: open }),
@@ -123,6 +124,6 @@ export const useGameStore = create<GameStoreState>((set) => ({
       mapOpen: false,
       bootError: null,
       worldPose: defaultWorldPose(),
-      objective: 'Contract: First Steps',
+      objective: missionTitle('tutorial'),
     }),
 }))

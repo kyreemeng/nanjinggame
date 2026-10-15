@@ -1,7 +1,9 @@
 import { useGameStore } from '../game/store/gameStore'
+import { useTranslation } from '../i18n'
 import { playMenuClick } from './menus/playClick'
 
 export function GameBootError() {
+  const { t } = useTranslation()
   const message = useGameStore((s) => s.bootError)
   const setBootError = useGameStore((s) => s.setBootError)
   const setPhase = useGameStore((s) => s.setPhase)
@@ -11,12 +13,9 @@ export function GameBootError() {
   return (
     <div className="menu-overlay dim">
       <div className="menu-card menu-card-tech">
-        <h2>Could not start 3D world</h2>
+        <h2>{t('boot.title')}</h2>
         <p className="menu-sub boot-error-text">{message}</p>
-        <p className="menu-hint">
-          Ashline needs WebGL in your browser. Try another browser, enable hardware acceleration, or
-          update graphics drivers.
-        </p>
+        <p className="menu-hint">{t('boot.hint')}</p>
         <button
           type="button"
           className="menu-btn primary"
@@ -26,7 +25,7 @@ export function GameBootError() {
             setPhase('menu')
           }}
         >
-          Back to Main Menu
+          {t('boot.back')}
         </button>
       </div>
     </div>

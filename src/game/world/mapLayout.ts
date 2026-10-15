@@ -76,13 +76,13 @@ export function worldToMapPx(x: number, z: number, size: number): { px: number; 
   }
 }
 
-export function mapLegend(): { zone: ZoneType; label: string }[] {
+export function mapLegend(): { zone: ZoneType }[] {
   return [
-    { zone: 'downtown', label: 'Downtown' },
-    { zone: 'residential', label: 'Residential' },
-    { zone: 'industrial', label: 'Industrial' },
-    { zone: 'waterfront', label: 'Waterfront' },
-    { zone: 'park', label: 'Parks' },
+    { zone: 'downtown' },
+    { zone: 'residential' },
+    { zone: 'industrial' },
+    { zone: 'waterfront' },
+    { zone: 'park' },
   ]
 }
 

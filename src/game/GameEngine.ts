@@ -19,6 +19,7 @@ import { WantedSystem } from './systems/WantedSystem'
 import { MissionManager } from './missions/MissionManager'
 import { applyGraphicsPreset } from './graphics/applyGraphicsPreset'
 import { getAudioManager } from './audio/AudioManager'
+import { t } from '../i18n'
 
 export type ControlMode = 'foot' | 'vehicle'
 
@@ -172,6 +173,10 @@ export class GameEngine {
   notifySettingsChanged(): void {
     this.settingsRevision++
     this.syncSettings()
+  }
+
+  notifyLocaleChanged(): void {
+    this.missions.relocalize()
   }
 
   private applyWorldFromStore(isNewGame: boolean): void {
@@ -339,7 +344,7 @@ export class GameEngine {
       if (this.pedestrians.tryInteract(this.player.position)) {
         this.talkedThisFrame = true
         this.interactCooldown = 0.35
-        useGameStore.getState().setHud({ missionToast: 'You exchanged a quick word.' })
+        useGameStore.getState().setHud({ missionToast: t('npc.chatToast') })
       }
     } else {
       const exit = this.vehicle.getExitPosition()

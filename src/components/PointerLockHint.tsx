@@ -1,6 +1,8 @@
 import { useEffect, useState } from 'react'
+import { useTranslation } from '../i18n'
 
 export function PointerLockHint() {
+  const { t } = useTranslation()
   const [visible, setVisible] = useState(true)
 
   useEffect(() => {
@@ -15,7 +17,7 @@ export function PointerLockHint() {
 
   return (
     <div className="pointer-hint" onClick={() => document.getElementById('game-canvas')?.requestPointerLock()}>
-      Click to capture mouse · Esc to pause
+      {t('pointer.hint')}
     </div>
   )
 }

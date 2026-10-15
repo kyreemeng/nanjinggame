@@ -1,5 +1,6 @@
 import { useEffect, useRef } from 'react'
 import { useGameStore } from '../../game/store/gameStore'
+import { useTranslation, type MessageKey } from '../../i18n'
 import {
   buildMapRoads,
   buildMapZones,
@@ -11,6 +12,7 @@ import {
 import { playMenuClick } from '../menus/playClick'
 
 export function FullMapOverlay() {
+  const { t } = useTranslation()
   const open = useGameStore((s) => s.mapOpen)
   const setMapOpen = useGameStore((s) => s.setMapOpen)
   const playerX = useGameStore((s) => s.playerX)
@@ -79,10 +81,11 @@ export function FullMapOverlay() {
     ctx.fill()
     ctx.restore()
 
+    const footer = t('map.footer', { district: t('brand.district'), size: WORLD_SIZE })
     ctx.fillStyle = 'rgba(255,255,255,0.5)'
     ctx.font = '11px system-ui'
-    ctx.fillText(`Harbor Row · ${WORLD_SIZE}m`, 12, h - 12)
-  }, [open, playerX, playerZ, compass, markers])
+    ctx.fillText(footer, 12, h - 12)
+  }, [open, playerX, playerZ, compass, markers, t])
 
   if (!open) return null
 
@@ -90,7 +93,7 @@ export function FullMapOverlay() {
     <div className="map-overlay">
       <div className="map-panel">
         <header className="map-header">
-          <h2>District Map</h2>
+          <h2>{t('map.title')}</h2>
           <button
             type="button"
             className="menu-btn compact"
@@ -99,7 +102,7 @@ export function FullMapOverlay() {
               setMapOpen(false)
             }}
           >
-            Close (M)
+            {t('map.close')}
           </button>
         </header>
         <canvas ref={canvasRef} className="map-canvas" />
@@ -107,10 +110,10 @@ export function FullMapOverlay() {
           {mapLegend().map((item) => (
             <span key={item.zone}>
               <i style={{ background: getZoneColor(item.zone) }} />
-              {item.label}
+              {t(`map.zone.${item.zone}` as MessageKey)}
             </span>
           ))}
-          <span><i className="marker-sample" /> Objective</span>
+          <span><i className="marker-sample" /> {t('map.objective')}</span>
         </div>
       </div>
     </div>

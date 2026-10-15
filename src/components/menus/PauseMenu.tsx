@@ -1,7 +1,9 @@
 import { useState } from 'react'
 import { useGameStore } from '../../game/store/gameStore'
+import { useTranslation } from '../../i18n'
 import { saveGame } from '../../storage/saveGame'
 import { ControlsHelpScreen } from './ControlsHelpScreen'
+import { LanguagePicker } from './LanguagePicker'
 import { MissionListScreen } from './MissionListScreen'
 import { playMenuClick } from './playClick'
 import { SettingsScreen } from './SettingsScreen'
@@ -9,6 +11,7 @@ import { SettingsScreen } from './SettingsScreen'
 type SubScreen = null | 'missions' | 'settings' | 'controls'
 
 export function PauseMenu() {
+  const { t } = useTranslation()
   const setPhase = useGameStore((s) => s.setPhase)
   const setMapOpen = useGameStore((s) => s.setMapOpen)
   const [sub, setSub] = useState<SubScreen>(null)
@@ -20,7 +23,8 @@ export function PauseMenu() {
   return (
     <div className="menu-overlay dim">
       <div className="menu-card menu-card-tech">
-        <h2>Paused</h2>
+        <h2>{t('pause.title')}</h2>
+        <LanguagePicker compact />
         <button
           type="button"
           className="menu-btn primary"
@@ -29,7 +33,7 @@ export function PauseMenu() {
             setPhase('playing')
           }}
         >
-          Resume
+          {t('pause.resume')}
         </button>
         <button
           type="button"
@@ -40,16 +44,16 @@ export function PauseMenu() {
             setPhase('playing')
           }}
         >
-          Map
+          {t('pause.map')}
         </button>
         <button type="button" className="menu-btn" onClick={() => setSub('missions')}>
-          Contracts
+          {t('menu.contracts')}
         </button>
         <button type="button" className="menu-btn" onClick={() => setSub('settings')}>
-          Settings
+          {t('menu.settings')}
         </button>
         <button type="button" className="menu-btn" onClick={() => setSub('controls')}>
-          Controls
+          {t('menu.controls')}
         </button>
         <button
           type="button"
@@ -59,7 +63,7 @@ export function PauseMenu() {
             saveGame()
           }}
         >
-          Save Game
+          {t('pause.save')}
         </button>
         <button
           type="button"
@@ -69,7 +73,7 @@ export function PauseMenu() {
             setPhase('menu')
           }}
         >
-          Main Menu
+          {t('pause.mainMenu')}
         </button>
       </div>
     </div>

@@ -1,7 +1,9 @@
 import { useState } from 'react'
-import { ACTION_LABELS, formatKeyCode, type GameAction } from '../../game/input/actions'
+import { formatKeyCode, type GameAction } from '../../game/input/actions'
 import { useSettingsStore } from '../../game/store/settingsStore'
+import { useTranslation, type MessageKey } from '../../i18n'
 import type { GraphicsPreset } from '../../storage/settings'
+import { LanguagePicker } from './LanguagePicker'
 import { MenuShell } from './MenuShell'
 import { playMenuClick } from './playClick'
 
@@ -24,6 +26,7 @@ interface SettingsScreenProps {
 }
 
 export function SettingsScreen({ onBack, onGraphicsChange }: SettingsScreenProps) {
+  const { t } = useTranslation()
   const settings = useSettingsStore()
   const [listening, setListening] = useState<GameAction | null>(null)
 
@@ -40,11 +43,14 @@ export function SettingsScreen({ onBack, onGraphicsChange }: SettingsScreenProps
     window.addEventListener('keydown', handler, true)
   }
 
+  const graphicsLabel = (g: GraphicsPreset) => t(`graphics.${g}`)
+
   return (
-    <MenuShell title="Settings" subtitle="Graphics, audio, and controls" onBack={onBack} wide>
+    <MenuShell title={t('settings.title')} subtitle={t('settings.subtitle')} onBack={onBack} wide>
+      <LanguagePicker />
       <div className="settings-grid">
         <label>
-          Master volume
+          {t('settings.masterVolume')}
           <input
             type="range"
             min={0}
@@ -55,7 +61,7 @@ export function SettingsScreen({ onBack, onGraphicsChange }: SettingsScreenProps
           />
         </label>
         <label>
-          SFX volume
+          {t('settings.sfxVolume')}
           <input
             type="range"
             min={0}
@@ -66,7 +72,7 @@ export function SettingsScreen({ onBack, onGraphicsChange }: SettingsScreenProps
           />
         </label>
         <label>
-          Music volume
+          {t('settings.musicVolume')}
           <input
             type="range"
             min={0}
@@ -77,7 +83,7 @@ export function SettingsScreen({ onBack, onGraphicsChange }: SettingsScreenProps
           />
         </label>
         <label>
-          Mouse sensitivity
+          {t('settings.mouseSensitivity')}
           <input
             type="range"
             min={0.4}
@@ -93,11 +99,11 @@ export function SettingsScreen({ onBack, onGraphicsChange }: SettingsScreenProps
             checked={settings.invertY}
             onChange={(e) => settings.patch({ invertY: e.target.checked })}
           />
-          Invert Y axis
+          {t('settings.invertY')}
         </label>
       </div>
 
-      <p className="settings-section-title">Graphics</p>
+      <p className="settings-section-title">{t('settings.graphics')}</p>
       <div className="graphics-row">
         {(['low', 'medium', 'high'] as GraphicsPreset[]).map((g) => (
           <button
@@ -110,12 +116,12 @@ export function SettingsScreen({ onBack, onGraphicsChange }: SettingsScreenProps
               onGraphicsChange?.(g)
             }}
           >
-            {g.charAt(0).toUpperCase() + g.slice(1)}
+            {graphicsLabel(g)}
           </button>
         ))}
       </div>
 
-      <p className="settings-section-title">Key bindings</p>
+      <p className="settings-section-title">{t('settings.keyBindings')}</p>
       <div className="bind-list">
         {BIND_ACTIONS.map((action) => (
           <button
@@ -124,9 +130,9 @@ export function SettingsScreen({ onBack, onGraphicsChange }: SettingsScreenProps
             className="bind-row"
             onClick={() => startListen(action)}
           >
-            <span>{ACTION_LABELS[action]}</span>
+            <span>{t(`action.${action}` as MessageKey)}</span>
             <span className="bind-key">
-              {listening === action ? 'Press key…' : formatKeyCode(settings.bindings[action])}
+              {listening === action ? t('settings.pressKey') : formatKeyCode(settings.bindings[action])}
             </span>
           </button>
         ))}

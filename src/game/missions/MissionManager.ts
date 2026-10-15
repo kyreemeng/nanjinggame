@@ -1,5 +1,6 @@
 import * as THREE from 'three'
 import { getAudioManager } from '../audio/AudioManager'
+import { landmarkLabel, missionTitle, t } from '../../i18n'
 import { useGameStore } from '../store/gameStore'
 import { LANDMARKS, MISSIONS, missionById, type MissionDef } from './missionDefinitions'
 import type { MissionState } from './types'
@@ -50,6 +51,16 @@ export class MissionManager {
     this.pushObjective()
   }
 
+  relocalize(): void {
+    this.pushObjective()
+    if (!this.activeId) {
+      useGameStore.getState().setHud({
+        objective: t('mission.allComplete'),
+        missionTimerSec: null,
+      })
+    }
+  }
+
   getSaveSlice(): MissionSaveSlice {
     return {
       completedIds: [...this.completed],
@@ -68,7 +79,7 @@ export class MissionManager {
 
     if (!this.activeId) {
       useGameStore.getState().setHud({
-        objective: 'All contracts complete — free roam Harbor Row.',
+        objective: t('mission.allComplete'),
         missionTimerSec: null,
       })
       return
@@ -90,8 +101,11 @@ export class MissionManager {
       case 'landmarks':
         this.updateLandmarks(def, signals)
         break
-      default:
+      default: {
+        const _exhaustive: never = def.kind
+        void _exhaustive
         break
+      }
     }
 
     this.syncMarkers()
@@ -99,6 +113,7 @@ export class MissionManager {
   }
 
   private updateTutorial(def: MissionDef, s: MissionSignals): void {
+    const title = missionTitle(def.id)
     const p = (this.progress.tutorial as { move: number; look: number; talk: boolean }) ?? {
       move: 0,
       look: 0,
@@ -113,24 +128,32 @@ export class MissionManager {
       this.complete(def)
     } else if (p.move < 12) {
       useGameStore.getState().setHud({
-        objective: `${def.title}: Walk around (${Math.min(12, Math.floor(p.move))}/12 m)`,
+        objective: t('mission.tutorial.walk', {
+          title,
+          meters: Math.min(12, Math.floor(p.move)),
+        }),
       })
     } else if (p.look < 55) {
       useGameStore.getState().setHud({
-        objective: `${def.title}: Look around with the mouse`,
+        objective: t('mission.tutorial.look', { title }),
       })
     } else {
       useGameStore.getState().setHud({
-        objective: `${def.title}: Press E near a pedestrian to chat`,
+        objective: t('mission.tutorial.talk', { title }),
       })
     }
   }
 
   private updateDriveTo(def: MissionDef, s: MissionSignals): void {
     const dest = def.destination!
+    const place = landmarkLabel(dest.landmarkId)
     const dist = Math.hypot(s.playerPos.x - dest.x, s.playerPos.z - dest.z)
     useGameStore.getState().setHud({
-      objective: `${def.title}: Drive to ${dest.label} (${Math.round(dist)} m)`,
+      objective: t('mission.driveTo', {
+        title: missionTitle(def.id),
+        place,
+        dist: Math.round(dist),
+      }),
     })
     if (s.driving && dist < 14) this.complete(def)
   }
@@ -142,12 +165,18 @@ export class MissionManager {
     const left = Math.max(0, (this.deadlineMs - performance.now()) / 1000)
     useGameStore.getState().setHud({ missionTimerSec: Math.ceil(left) })
     const dest = def.destination!
+    const place = landmarkLabel(dest.landmarkId)
     const dist = Math.hypot(s.playerPos.x - dest.x, s.playerPos.z - dest.z)
     useGameStore.getState().setHud({
-      objective: `${def.title}: ${dest.label} — ${Math.round(dist)} m · ${Math.ceil(left)}s`,
+      objective: t('mission.timedDrive', {
+        title: missionTitle(def.id),
+        place,
+        dist: Math.round(dist),
+        time: Math.ceil(left),
+      }),
     })
     if (left <= 0 && dist >= 14) {
-      this.fail(def, 'Time expired — contract failed.')
+      this.fail(def, t('mission.fail.timeExpired'))
       return
     }
     if (s.driving && dist < 16) this.complete(def)
@@ -165,7 +194,11 @@ export class MissionManager {
     this.progress.found = found
     const need = def.landmarkIds?.length ?? 0
     useGameStore.getState().setHud({
-      objective: `${def.title}: Landmarks ${found.length}/${need}`,
+      objective: t('mission.landmarks', {
+        title: missionTitle(def.id),
+        found: found.length,
+        need,
+      }),
     })
     if (found.length >= need) this.complete(def)
   }
@@ -176,7 +209,10 @@ export class MissionManager {
     getAudioManager().playMissionComplete()
     useGameStore.getState().setHud({
       money,
-      missionToast: `Contract complete: ${def.title} (+$${def.reward})`,
+      missionToast: t('mission.complete', {
+        title: missionTitle(def.id),
+        reward: def.reward,
+      }),
     })
     this.toastTimer = 5
     this.deadlineMs = null
@@ -197,13 +233,13 @@ export class MissionManager {
     this.syncMarkers()
   }
 
-  private fail(def: MissionDef, message: string): void {
+  private fail(_def: MissionDef, message: string): void {
     useGameStore.getState().setHud({
       missionToast: message,
       missionTimerSec: null,
     })
     this.toastTimer = 4
-    this.deadlineMs = performance.now() + (def.timeLimitSec ?? 60) * 1000
+    this.deadlineMs = performance.now() + (_def.timeLimitSec ?? 60) * 1000
   }
 
   private restoreDeadline(): void {
@@ -222,13 +258,17 @@ export class MissionManager {
       return
     }
     if (def.destination) {
-      markers.push({ x: def.destination.x, z: def.destination.z, label: def.destination.label })
+      markers.push({
+        x: def.destination.x,
+        z: def.destination.z,
+        label: landmarkLabel(def.destination.landmarkId),
+      })
     }
     if (def.kind === 'landmarks') {
       for (const id of def.landmarkIds ?? []) {
         const lm = LANDMARKS[id]
         const found = ((this.progress.found as string[]) ?? []).includes(id)
-        if (!found) markers.push({ x: lm.x, z: lm.z, label: lm.label })
+        if (!found) markers.push({ x: lm.x, z: lm.z, label: landmarkLabel(id) })
       }
     }
     useGameStore.getState().setHud({ mapMarkers: markers })

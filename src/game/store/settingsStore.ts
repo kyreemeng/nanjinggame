@@ -24,6 +24,7 @@ export const useSettingsStore = create<SettingsStore>((set, get) => ({
       mouseSensitivity: next.mouseSensitivity,
       invertY: next.invertY,
       graphics: next.graphics,
+      locale: next.locale,
       bindings: next.bindings,
     })
     set(partial)

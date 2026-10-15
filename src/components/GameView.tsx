@@ -2,6 +2,7 @@ import { useEffect, useRef } from 'react'
 import { GameEngine } from '../game/GameEngine'
 import { useGameStore } from '../game/store/gameStore'
 import { useSettingsStore } from '../game/store/settingsStore'
+import { t } from '../i18n'
 
 export function GameView() {
   const canvasRef = useRef<HTMLCanvasElement>(null)
@@ -17,7 +18,7 @@ export function GameView() {
 
     engine.start().catch((err) => {
       console.error('Failed to start game', err)
-      const message = err instanceof Error ? err.message : 'Unknown startup error'
+      const message = err instanceof Error ? err.message : t('boot.unknownError')
       useGameStore.getState().setBootError(message)
       useGameStore.getState().setPhase('menu')
     })
@@ -28,6 +29,9 @@ export function GameView() {
     const unsubSettings = useSettingsStore.subscribe((state, prev) => {
       if (state.graphics !== prev.graphics) {
         engineRef.current?.applyGraphics(state.graphics)
+      }
+      if (state.locale !== prev.locale) {
+        engineRef.current?.notifyLocaleChanged()
       }
     })
 

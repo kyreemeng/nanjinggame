@@ -1,6 +1,7 @@
 import { MISSIONS } from '../../game/missions/missionDefinitions'
 import type { MissionSaveSlice } from '../../game/missions/MissionManager'
 import { useGameStore } from '../../game/store/gameStore'
+import { useTranslation, type MessageKey } from '../../i18n'
 import { defaultMissionSave, loadSave } from '../../storage/saveGame'
 import { MenuShell } from './MenuShell'
 
@@ -20,13 +21,14 @@ function resolveMissionSave(preferDisk: boolean): MissionSaveSlice {
 }
 
 export function MissionListScreen({ onBack, preferDiskSave = false }: MissionListScreenProps) {
+  const { t, missionTitle, missionDescription } = useTranslation()
   const liveSave = useGameStore((s) => s.missionSave)
   const missionSave = preferDiskSave ? resolveMissionSave(true) : liveSave
   const completed = new Set(missionSave.completedIds)
   const active = missionSave.activeId
 
   return (
-    <MenuShell title="Contracts" subtitle="Live mission state from your save" onBack={onBack} wide>
+    <MenuShell title={t('contracts.title')} subtitle={t('contracts.subtitle')} onBack={onBack} wide>
       <ul className="mission-list">
         {MISSIONS.map((m, index) => {
           const priorDone = MISSIONS.slice(0, index).every((x) => completed.has(x.id))
@@ -40,11 +42,13 @@ export function MissionListScreen({ onBack, preferDiskSave = false }: MissionLis
           return (
             <li key={m.id} className={`mission-item status-${status}`}>
               <div className="mission-item-head">
-                <strong>{m.title}</strong>
-                <span className="mission-badge">{status}</span>
+                <strong>{missionTitle(m.id)}</strong>
+                <span className="mission-badge">{t(`mission.status.${status}` as MessageKey)}</span>
               </div>
-              <p>{m.description}</p>
-              <span className="mission-reward">Reward ${m.reward}</span>
+              <p>{missionDescription(m.id)}</p>
+              <span className="mission-reward">
+                {t('contracts.reward')} ${m.reward}
+              </span>
             </li>
           )
         })}

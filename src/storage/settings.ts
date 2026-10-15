@@ -1,4 +1,5 @@
 import { DEFAULT_BINDINGS, type GameAction } from '../game/input/actions'
+import type { Locale } from '../i18n/messages'
 
 const SETTINGS_KEY = 'ashline-settings-v2'
 
@@ -11,6 +12,7 @@ export interface GameSettings {
   mouseSensitivity: number
   invertY: boolean
   graphics: GraphicsPreset
+  locale: Locale
   bindings: Record<GameAction, string>
 }
 
@@ -21,6 +23,7 @@ export const DEFAULT_SETTINGS: GameSettings = {
   mouseSensitivity: 1,
   invertY: false,
   graphics: 'medium',
+  locale: 'en',
   bindings: { ...DEFAULT_BINDINGS },
 }
 
@@ -32,6 +35,7 @@ export function loadSettings(): GameSettings {
     return {
       ...DEFAULT_SETTINGS,
       ...parsed,
+      locale: parsed.locale === 'zh' ? 'zh' : 'en',
       bindings: { ...DEFAULT_BINDINGS, ...parsed.bindings },
     }
   } catch {

@@ -1,4 +1,5 @@
 import * as THREE from 'three'
+import { t, type MessageKey } from '../../i18n'
 import { sampleSidewalkLoops } from '../world/roadGraph'
 
 const MAX_PEDS = 28
@@ -12,7 +13,7 @@ interface Pedestrian {
   u: number
   speed: number
   idleLeft: number
-  greetLine: string
+  greetKey: MessageKey
 }
 
 function createPedMesh(shirt: string, pants: string): THREE.Group {
@@ -39,12 +40,7 @@ function createPedMesh(shirt: string, pants: string): THREE.Group {
 
 const SHIRTS = ['#b84a4a', '#4a7ab8', '#6a8f5c', '#c9a03a', '#7a5a9a', '#3d8c8c']
 const PANTS = ['#2a2f38', '#3d4550', '#4a4038', '#1e2830']
-const GREETINGS = [
-  'Morning — mind the boulevard traffic.',
-  'Courier lane’s busy today.',
-  'Harbor Row never sleeps.',
-  'Watch for trams near the pier.',
-]
+const GREETING_KEYS: MessageKey[] = ['npc.greet0', 'npc.greet1', 'npc.greet2', 'npc.greet3']
 
 export class PedestrianSystem {
   private readonly peds: Pedestrian[] = []
@@ -79,7 +75,7 @@ export class PedestrianSystem {
       u: 0,
       speed: 0.9,
       idleLeft: 0,
-      greetLine: 'Welcome to Harbor Row — press E to chat.',
+      greetKey: 'npc.tutorialGreet',
     }
     this.peds.push(this.tutorialPed)
   }
@@ -133,7 +129,7 @@ export class PedestrianSystem {
   getNearestGreet(playerPos: THREE.Vector3): string | null {
     if (!this.nearestPed) return null
     if (this.nearestPed.mesh.position.distanceTo(playerPos) > 2.8) return null
-    return this.nearestPed.greetLine
+    return t(this.nearestPed.greetKey)
   }
 
   tryInteract(playerPos: THREE.Vector3): boolean {
@@ -161,7 +157,7 @@ export class PedestrianSystem {
       u: Math.random(),
       speed: 1.1 + Math.random() * 0.7,
       idleLeft: 0,
-      greetLine: GREETINGS[Math.floor(Math.random() * GREETINGS.length)],
+      greetKey: GREETING_KEYS[Math.floor(Math.random() * GREETING_KEYS.length)],
     })
   }
 

@@ -1,30 +1,48 @@
-import { ACTION_LABELS, formatKeyCode } from '../../game/input/actions'
+import { formatKeyCode, type GameAction } from '../../game/input/actions'
 import { useSettingsStore } from '../../game/store/settingsStore'
+import { useTranslation, type MessageKey } from '../../i18n'
 import { MenuShell } from './MenuShell'
+
+const DISPLAY_ACTIONS: GameAction[] = [
+  'forward',
+  'back',
+  'left',
+  'right',
+  'run',
+  'jump',
+  'interact',
+  'brake',
+  'accelerate',
+  'reverse',
+  'steerLeft',
+  'steerRight',
+  'map',
+]
 
 interface ControlsHelpScreenProps {
   onBack: () => void
 }
 
 export function ControlsHelpScreen({ onBack }: ControlsHelpScreenProps) {
+  const { t } = useTranslation()
   const bindings = useSettingsStore((s) => s.bindings)
 
   return (
-    <MenuShell title="Controls" subtitle="Default bindings — customize in Settings" onBack={onBack} wide>
+    <MenuShell title={t('controls.title')} subtitle={t('controls.subtitle')} onBack={onBack} wide>
       <ul className="controls-list">
-        {Object.entries(ACTION_LABELS).map(([action, label]) => (
+        {DISPLAY_ACTIONS.map((action) => (
           <li key={action}>
-            <span>{label}</span>
-            <kbd>{formatKeyCode(bindings[action as keyof typeof bindings])}</kbd>
+            <span>{t(`action.${action}` as MessageKey)}</span>
+            <kbd>{formatKeyCode(bindings[action])}</kbd>
           </li>
         ))}
         <li>
-          <span>Pause menu</span>
+          <span>{t('controls.pause')}</span>
           <kbd>Esc</kbd>
         </li>
         <li>
-          <span>Steer / drive (alt)</span>
-          <kbd>Arrow keys</kbd>
+          <span>{t('controls.steerAlt')}</span>
+          <kbd>{t('controls.arrowKeys')}</kbd>
         </li>
       </ul>
     </MenuShell>
