@@ -9,6 +9,7 @@ import { useGameStore } from './game/store/gameStore'
 function App() {
   const phase = useGameStore((s) => s.phase)
   const [sessionStarted, setSessionStarted] = useState(false)
+  const [sessionKey, setSessionKey] = useState(0)
 
   useEffect(() => {
     if (phase === 'playing' || phase === 'paused') {
@@ -29,18 +30,20 @@ function App() {
     return () => window.removeEventListener('keydown', onKeyDown)
   }, [])
 
+  const onStartSession = () => setSessionKey((k) => k + 1)
+
   const inWorld = sessionStarted && phase !== 'menu'
 
   return (
     <div className="app-shell">
-      {sessionStarted && <GameView />}
+      {sessionStarted && <GameView key={sessionKey} />}
       {inWorld && phase === 'playing' && (
         <>
           <HUD />
           <PointerLockHint />
         </>
       )}
-      {phase === 'menu' && <MainMenu />}
+      {phase === 'menu' && <MainMenu onStartSession={onStartSession} />}
       {phase === 'paused' && <PauseMenu />}
     </div>
   )

@@ -51,7 +51,7 @@ npm run preview
 - Third-person movement, one drivable vehicle, HUD, menus, Rapier collisions.
 - Core loop: walk → enter car → drive → exit.
 
-## Phase 2 (this build)
+## Phase 2 (complete)
 
 - **Larger Harbor Row**: 7×6 block grid (~400 m), north–south boulevard + east–west artery, side streets.
 - **Zones**: downtown towers, residential rowhouses, industrial warehouses, waterfront piers & water, pocket parks.
@@ -60,12 +60,24 @@ npm run preview
 - **Performance**: shared materials, `InstancedMesh` props, emissive lamps instead of hundreds of lights.
 - **Hooks**: `DayNightCycle` (off by default), traffic/pedestrian/wanted stubs wired in the engine tick.
 
-## Next (Phase 3+)
+## Phase 3 (this build)
 
-- Moving traffic & pedestrians using road/sidewalk graphs
-- Police / wanted gameplay tied to `WantedSystem`
-- Mission chain, map UI, day/night polish, quality presets
-- IndexedDB save slots
+- **Traffic AI**: up to 18 vehicles follow the intersection road graph, yield at junctions, despawn beyond ~130 m.
+- **Pedestrians**: sidewalk loops, walk/idle, greet + **E** to chat; capped spawn with distance culling.
+- **Missions** (data-driven, HUD + 3D markers + minimap blips):
+  1. *First Steps* — move, look, talk to an NPC
+  2. *Courier Run* — drive to Glass Spire Plaza
+  3. *Rush Delivery* — timed run to South Pier
+  4. *Harbor Row Tour* — discover four landmarks
+- **Economy**: mission payouts update Credits on the HUD.
+- **Save**: `localStorage` — **Continue** / **Save Game** (pause menu); stores money, health, mission progress.
+- **Wanted (light)**: heat rises if you ram traffic at speed; 0–5 stars on HUD (police chase deferred).
+
+## Next (Phase 4+)
+
+- Police pursuit AI tied to wanted tier
+- Mission board UI, more contracts, failure/retry polish
+- Day/night gameplay, quality presets, IndexedDB if saves grow
 
 ## Stack
 

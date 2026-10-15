@@ -1,6 +1,14 @@
 import { create } from 'zustand'
+import type { MissionSaveSlice } from '../missions/MissionManager'
+import { defaultMissionSave } from '../../storage/saveGame'
 
 export type GamePhase = 'menu' | 'playing' | 'paused'
+
+export interface MapMarker {
+  x: number
+  z: number
+  label?: string
+}
 
 export interface GameStoreState {
   phase: GamePhase
@@ -14,6 +22,13 @@ export interface GameStoreState {
   playerZ: number
   driving: boolean
   canEnterVehicle: boolean
+  missionToast: string | null
+  missionTimerSec: number | null
+  mapMarkers: MapMarker[]
+  missionSave: MissionSaveSlice
+  newGameSession: boolean
+  wantedStars: number
+  npcPrompt: string | null
   setPhase: (phase: GamePhase) => void
   setHud: (
     partial: Partial<
@@ -29,9 +44,17 @@ export interface GameStoreState {
         | 'playerZ'
         | 'driving'
         | 'canEnterVehicle'
+        | 'missionToast'
+        | 'missionTimerSec'
+        | 'mapMarkers'
+        | 'wantedStars'
+        | 'npcPrompt'
       >
     >,
   ) => void
+  setMissionSave: (slice: MissionSaveSlice) => void
+  setNewGameSession: (v: boolean) => void
+  hydrateFromSave: (data: { money: number; health: number; missionSave: MissionSaveSlice }) => void
   resetRun: () => void
 }
 
@@ -39,7 +62,7 @@ export const useGameStore = create<GameStoreState>((set) => ({
   phase: 'menu',
   health: 100,
   money: 320,
-  objective: 'Scout Harbor Row — find the courier drop.',
+  objective: 'Contract: First Steps',
   speedKmh: 0,
   fps: 0,
   compassDeg: 0,
@@ -47,8 +70,24 @@ export const useGameStore = create<GameStoreState>((set) => ({
   playerZ: 0,
   driving: false,
   canEnterVehicle: false,
+  missionToast: null,
+  missionTimerSec: null,
+  mapMarkers: [],
+  missionSave: defaultMissionSave(),
+  newGameSession: true,
+  wantedStars: 0,
+  npcPrompt: null,
   setPhase: (phase) => set({ phase }),
   setHud: (partial) => set(partial),
+  setMissionSave: (slice) => set({ missionSave: slice }),
+  setNewGameSession: (v) => set({ newGameSession: v }),
+  hydrateFromSave: (data) =>
+    set({
+      money: data.money,
+      health: data.health,
+      missionSave: data.missionSave,
+      newGameSession: false,
+    }),
   resetRun: () =>
     set({
       health: 100,
@@ -56,5 +95,13 @@ export const useGameStore = create<GameStoreState>((set) => ({
       speedKmh: 0,
       driving: false,
       canEnterVehicle: false,
+      missionToast: null,
+      missionTimerSec: null,
+      mapMarkers: [],
+      missionSave: defaultMissionSave(),
+      newGameSession: true,
+      wantedStars: 0,
+      npcPrompt: null,
+      objective: 'Contract: First Steps',
     }),
 }))

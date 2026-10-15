@@ -1,5 +1,6 @@
 import { useGameStore } from '../../game/store/gameStore'
 import { Minimap } from './Minimap'
+import { MissionToast } from './MissionToast'
 
 export function HUD() {
   const health = useGameStore((s) => s.health)
@@ -10,6 +11,9 @@ export function HUD() {
   const compass = useGameStore((s) => s.compassDeg)
   const driving = useGameStore((s) => s.driving)
   const canEnter = useGameStore((s) => s.canEnterVehicle)
+  const timer = useGameStore((s) => s.missionTimerSec)
+  const wanted = useGameStore((s) => s.wantedStars)
+  const npcPrompt = useGameStore((s) => s.npcPrompt)
 
   const heading =
     compass < 22.5 || compass >= 337.5
@@ -30,11 +34,17 @@ export function HUD() {
 
   return (
     <div className="hud">
+      <MissionToast />
       <div className="hud-top">
         <Minimap />
         <div className="compass">
           <span className="compass-deg">{Math.round(compass)}°</span>
           <span className="compass-cardinal">{heading}</span>
+        </div>
+        {timer !== null && <div className="mission-timer">{timer}s</div>}
+        <div className="wanted" aria-label={`Heat level ${wanted}`}>
+          {'★'.repeat(wanted)}
+          <span className="wanted-dim">{'★'.repeat(5 - wanted)}</span>
         </div>
         <div className="fps">{fps} FPS</div>
       </div>
@@ -59,6 +69,8 @@ export function HUD() {
           <div className="speed-readout">{Math.round(speed)} km/h</div>
         ) : canEnter ? (
           <div className="prompt">Press E to enter vehicle</div>
+        ) : npcPrompt ? (
+          <div className="prompt">{npcPrompt} — Press E to chat</div>
         ) : null}
       </div>
     </div>

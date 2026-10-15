@@ -164,6 +164,55 @@ body,
   filter: drop-shadow(0 0 4px rgba(95, 212, 255, 0.8));
 }
 
+.minimap-marker {
+  position: absolute;
+  width: 7px;
+  height: 7px;
+  border-radius: 50%;
+  background: #ffc857;
+  transform: translate(-50%, -50%);
+  box-shadow: 0 0 6px rgba(255, 200, 87, 0.9);
+}
+
+.mission-toast {
+  position: absolute;
+  top: 1rem;
+  left: 50%;
+  transform: translateX(-50%);
+  z-index: 12;
+  padding: 0.65rem 1rem;
+  border-radius: 10px;
+  background: rgba(18, 32, 48, 0.92);
+  border: 1px solid rgba(126, 215, 255, 0.45);
+  font-size: 0.92rem;
+  max-width: min(420px, 90vw);
+  text-align: center;
+  pointer-events: none;
+}
+
+.mission-timer {
+  padding: 0.4rem 0.65rem;
+  border-radius: 10px;
+  background: rgba(120, 40, 40, 0.75);
+  border: 1px solid rgba(255, 140, 140, 0.45);
+  font-weight: 700;
+  font-size: 0.95rem;
+}
+
+.wanted {
+  padding: 0.35rem 0.55rem;
+  border-radius: 8px;
+  background: rgba(8, 12, 18, 0.72);
+  border: 1px solid rgba(255, 255, 255, 0.12);
+  color: #ff6b6b;
+  letter-spacing: 0.08em;
+  font-size: 0.85rem;
+}
+
+.wanted-dim {
+  color: rgba(255, 255, 255, 0.15);
+}
+
 .minimap-label {
   display: block;
   margin-top: 0.25rem;
