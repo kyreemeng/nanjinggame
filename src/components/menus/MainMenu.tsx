@@ -1,7 +1,7 @@
 import { useEffect, useState } from 'react'
 import { DISTRICT_NAME, GAME_TITLE } from '../../game/constants'
 import { useGameStore } from '../../game/store/gameStore'
-import { applySaveToStore, hasSave, loadSave } from '../../storage/saveGame'
+import { applySaveToStore, clearSave, hasSave, loadSave } from '../../storage/saveGame'
 import { ControlsHelpScreen } from './ControlsHelpScreen'
 import { MissionListScreen } from './MissionListScreen'
 import { playMenuClick } from './playClick'
@@ -24,12 +24,16 @@ export function MainMenu({ onStartSession }: MainMenuProps) {
     setCanContinue(hasSave())
   }, [])
 
-  if (sub === 'missions') return <MissionListScreen onBack={() => setSub(null)} />
+
+  if (sub === 'missions')
+    return <MissionListScreen preferDiskSave onBack={() => setSub(null)} />
   if (sub === 'settings') return <SettingsScreen onBack={() => setSub(null)} />
   if (sub === 'controls') return <ControlsHelpScreen onBack={() => setSub(null)} />
 
   const startNew = () => {
     playMenuClick()
+    clearSave()
+    setCanContinue(false)
     resetRun()
     setNewGameSession(true)
     onStartSession()

@@ -122,6 +122,10 @@ export class GameEngine {
   }
 
   resume(): void {
+    if (useGameStore.getState().mapOpen) {
+      this.input.setEnabled(false)
+      return
+    }
     this.input.setEnabled(true)
     this.input.requestPointerLock(this.canvas)
   }
@@ -167,7 +171,7 @@ export class GameEngine {
       const mapOpen = store.mapOpen
       if (mapOpen) {
         this.input.setEnabled(false)
-      } else if (!this.input.isPointerLocked) {
+      } else {
         this.input.setEnabled(true)
       }
 
@@ -229,7 +233,7 @@ export class GameEngine {
       if (this.mode === 'vehicle' && speedKmh > 10) {
         for (const carPos of this.traffic.getCarPositions()) {
           if (playerPos.distanceTo(carPos) < 2.4) {
-            this.wanted.addHeat(18)
+            this.wanted.addHeat(26)
             break
           }
         }

@@ -5,6 +5,7 @@ import { HUD } from './components/hud/HUD'
 import { MainMenu } from './components/menus/MainMenu'
 import { PauseMenu } from './components/menus/PauseMenu'
 import { PointerLockHint } from './components/PointerLockHint'
+import { GameBootError } from './components/GameBootError'
 import { useGameStore } from './game/store/gameStore'
 import { useSettingsStore } from './game/store/settingsStore'
 
@@ -70,6 +71,7 @@ function App() {
         </>
       )}
       {inWorld && mapOpen && <FullMapOverlay />}
+      <GameBootError />
       {phase === 'menu' && <MainMenu onStartSession={onStartSession} />}
       {phase === 'paused' && <PauseMenu />}
     </div>

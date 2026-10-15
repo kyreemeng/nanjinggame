@@ -1,13 +1,27 @@
 import { MISSIONS } from '../../game/missions/missionDefinitions'
+import type { MissionSaveSlice } from '../../game/missions/MissionManager'
 import { useGameStore } from '../../game/store/gameStore'
+import { defaultMissionSave, loadSave } from '../../storage/saveGame'
 import { MenuShell } from './MenuShell'
 
 interface MissionListScreenProps {
   onBack: () => void
+  /** When true, show mission progress from disk save (main menu). */
+  preferDiskSave?: boolean
 }
 
-export function MissionListScreen({ onBack }: MissionListScreenProps) {
-  const missionSave = useGameStore((s) => s.missionSave)
+function resolveMissionSave(preferDisk: boolean): MissionSaveSlice {
+  if (preferDisk) {
+    const disk = loadSave()
+    if (disk) return disk.missions
+    return defaultMissionSave()
+  }
+  return useGameStore.getState().missionSave
+}
+
+export function MissionListScreen({ onBack, preferDiskSave = false }: MissionListScreenProps) {
+  const liveSave = useGameStore((s) => s.missionSave)
+  const missionSave = preferDiskSave ? resolveMissionSave(true) : liveSave
   const completed = new Set(missionSave.completedIds)
   const active = missionSave.activeId
 

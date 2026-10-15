@@ -17,6 +17,9 @@ export function GameView() {
 
     engine.start().catch((err) => {
       console.error('Failed to start game', err)
+      const message = err instanceof Error ? err.message : 'Unknown startup error'
+      useGameStore.getState().setBootError(message)
+      useGameStore.getState().setPhase('menu')
     })
 
     const onResize = () => engine.onResize()

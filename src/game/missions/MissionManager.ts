@@ -109,13 +109,13 @@ export class MissionManager {
     if (s.talkedToPed) p.talk = true
     this.progress.tutorial = p
 
-    if (p.move >= 12 && p.look >= 80 && p.talk) {
+    if (p.move >= 12 && p.look >= 55 && p.talk) {
       this.complete(def)
     } else if (p.move < 12) {
       useGameStore.getState().setHud({
         objective: `${def.title}: Walk around (${Math.min(12, Math.floor(p.move))}/12 m)`,
       })
-    } else if (p.look < 80) {
+    } else if (p.look < 55) {
       useGameStore.getState().setHud({
         objective: `${def.title}: Look around with the mouse`,
       })

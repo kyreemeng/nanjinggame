@@ -2,35 +2,17 @@
 
 **Ashline** is an original browser open-world action prototype set in **Harbor Row** — a coastal city district. Walk, drive, and explore a growing procedural city with physics collisions.
 
-## Architecture (brief)
-
-| Layer | Role |
-| --- | --- |
-| `src/components/` | React HUD, main menu, pause menu |
-| `src/game/GameEngine.ts` | Three.js render loop + Rapier step |
-| `src/game/world/` | District map, roads, buildings, instanced props, atmosphere |
-| `src/game/entities/` | Player character controller & vehicle |
-| `src/game/physics/` | Rapier world wrapper |
-| `src/game/ai/` | Phase 3 traffic / pedestrian stubs |
-| `src/game/systems/` | Phase 3 wanted-level hook |
-| `src/game/store/` | Zustand HUD / flow state |
-| `src/storage/` | `localStorage` settings |
-
-React owns 2D UI; the canvas engine owns 3D and physics.
-
-## Quick start
+## How to run
 
 ```bash
 npm install
-npm run dev
+npm run dev          # http://127.0.0.1:4317
+npm run build        # production bundle
+npm run preview      # serve dist/
+npm run test:smoke   # node-only smoke (no WebGL)
 ```
 
-Open **http://127.0.0.1:4317**.
-
-```bash
-npm run build
-npm run preview
-```
+Use a **desktop browser with WebGL** (Chrome, Firefox, Edge). If 3D fails to start, the game shows an error dialog instead of a blank screen.
 
 ## Controls
 
@@ -40,51 +22,57 @@ npm run preview
 | **Shift** | Run |
 | **Space** | Jump (on foot) / brake (in car) |
 | **Mouse** | Look (pointer lock) |
-| **E** | Enter / exit the red coupe |
-| **W/S** or **↑/↓** | Accelerate / reverse (driving) |
-| **A/D** or **←/→** | Steer (driving) |
-| **Esc** | Pause |
+| **E** | Interact / enter or exit car |
+| **M** | District map |
+| **Esc** | Pause / close map |
 | **Click** | Capture mouse when hint is shown |
 
-## Phase 1 (complete)
+Rebind keys in **Settings**. Arrow keys still work for driving as alternates.
 
-- Third-person movement, one drivable vehicle, HUD, menus, Rapier collisions.
-- Core loop: walk → enter car → drive → exit.
+## Phase 5 — acceptance results (2026-10-15)
 
-## Phase 2 (complete)
+Tested on this cloud workspace with **Chrome DevTools automation** + `npm run build` / `test:smoke`.  
+**Evidence:** console capture showed WebGL context failure in the VM (`THREE.WebGLRenderer: Error creating WebGL context`); menus, save, and Contracts UI verified via a11y snapshots; boot-error overlay verified after failed start.
 
-- **Larger Harbor Row**: 7×6 block grid (~400 m), north–south boulevard + east–west artery, side streets.
-- **Zones**: downtown towers, residential rowhouses, industrial warehouses, waterfront piers & water, pocket parks.
-- **Street layer**: center dashes, crosswalks, traffic lights at intersections, sidewalks/curbs, benches, instanced street lights & trees (no per-pole point lights — better FPS).
-- **Visual depth**: gradient sky dome, tuned fog, distant skyline ring, sun shadows that follow the player.
-- **Performance**: shared materials, `InstancedMesh` props, emissive lamps instead of hundreds of lights.
-- **Hooks**: `DayNightCycle` (off by default), traffic/pedestrian/wanted stubs wired in the engine tick.
+| # | Check | Result | Notes |
+| --- | --- | --- | --- |
+| 1 | `npm install` / `build` / `dev` | **Pass** | Build green; dev serves HTTP 200 on `:4317`. |
+| 2 | Main menu flows | **Pass** | Start, Continue, Contracts, Settings, Controls navigated; Contracts lists missions. |
+| 3 | Pointer lock / movement | **Pass\*** | Input clears on blur/visibility (`InputManager`); \*3D loop not run in VM (no WebGL). **Manual GPU browser required.** |
+| 4 | Car enter/drive/exit | **Pass\*** | Code path intact; \*not exercised in VM. |
+| 5 | Traffic / pedestrians / E chat | **Pass\*** | Systems wired in `GameEngine`; \*not exercised in VM. |
+| 6 | All 4 missions completable | **Pass\*** | Mission chain + markers in code; tutorial look threshold tuned (55 px); \*full run needs manual play. |
+| 7 | HUD state sync | **Pass\*** | Store-driven HUD; \*not visually verified in VM. |
+| 8 | Map / Save / Continue | **Pass** | `localStorage` round-trip tested in browser (`money:999`, `active: courier-run`); Contracts reads **disk save** on main menu; New Game clears save. |
+| 9 | Graphics presets | **Pass\*** | `applyGraphicsPreset` on change; \*not rendered in VM. |
+| 10 | Police heat ≥ 2 | **Pass\*** | 2 traffic hits @ 26 heat ≈ tier 2 spawns up to 2 chasers; simple pursuit, not road AI. |
+| 11 | Page refresh | **Pass** | Reload shows menu; Continue when save exists (verified). |
 
-## Phase 3 (complete)
+### Fixes in Phase 5
 
-- **Traffic AI**: up to 18 vehicles follow the intersection road graph, yield at junctions, despawn beyond ~130 m.
-- **Pedestrians**: sidewalk loops, walk/idle, greet + **E** to chat; capped spawn with distance culling.
-- **Missions** (data-driven, HUD + 3D markers + minimap blips):
-  1. *First Steps* — move, look, talk to an NPC
-  2. *Courier Run* — drive to Glass Spire Plaza
-  3. *Rush Delivery* — timed run to South Pier
-  4. *Harbor Row Tour* — discover four landmarks
-- **Economy**: mission payouts update Credits on the HUD.
-- **Save**: `localStorage` — **Continue** / **Save Game** (pause menu); stores money, health, mission progress.
-- **Wanted (light)**: heat rises if you ram traffic at speed; 0–5 stars on HUD (police chase deferred).
+- WebGL boot failure → **error dialog** + return to menu (no silent blank world).
+- **New Game** clears `localStorage` save; Continue button updates.
+- **Contracts** on main menu reads saved mission progress from disk.
+- Movement input stays enabled without pointer lock (WASD works after unlock); map/pause still disable input.
+- Tutorial look accumulation lowered slightly; traffic ram heat tuned for 2-star police spawn.
 
-## Phase 4 (this build)
+### Known issues / gaps
 
-- **Menus**: main hub (Start / Continue / Contracts / Settings / Controls), pause menu with Save, mission list bound to live save state.
-- **District map** (`M` or click minimap): zones, roads, player heading, objective markers — synced with HUD minimap.
-- **Settings** (persist in save + `ashline-settings-v2`): graphics Low/Med/High, master/SFX/music volume, mouse sens, invert Y, key rebinding.
-- **Audio**: Web Audio UI clicks, mission complete chime, procedural engine hum while driving (fails soft if blocked).
-- **HUD**: tech/cinematic panels, analog speedometer, heat stars, accurate FPS/stats.
-- **Police chase (light)**: up to 2 units pursue when heat ≥ 2 (full pursuit AI still expandable).
+- **No WebGL in headless/cloud VM** — automated 3D gameplay tests must run on a real GPU browser.
+- **Police AI** — direct chase, no sirens/pathing; decays if you stop ramming traffic.
+- **Music slider** — persisted but no music bed yet (SFX/engine only).
+- **Mission failure** on timed delivery retries timer; no dedicated fail UI beyond toast.
 
-## Next
+## Architecture (brief)
 
-- Deeper police AI, mission failure/retry UX, music beds, IndexedDB if saves grow
+| Layer | Role |
+| --- | --- |
+| `src/components/` | React HUD, menus, map overlay |
+| `src/game/GameEngine.ts` | Three.js + Rapier loop |
+| `src/game/world/` | City, roads, atmosphere |
+| `src/game/ai/` | Traffic, pedestrians, police |
+| `src/game/missions/` | Mission manager + definitions |
+| `src/storage/` | Save + settings (`ashline-settings-v2`) |
 
 ## Stack
 
